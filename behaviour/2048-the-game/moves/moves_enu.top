@@ -1,0 +1,17 @@
+topic: ~moves()
+language: enu
+
+# Defining extra concepts out of words or group of words
+concept:(north) ["move north" "go north"]
+concept:(south) ["move south" "go south"]
+concept:(east) ["move east" "go east"]
+concept:(west) ["move west" "go west"]
+
+# Catching inputs and triggering outputs
+#u:(e:onStart) $onStopped=1
+u:(~north) $2048/move="north" $onStopped=1
+u:(~south) $2048/move="south" $onStopped=1
+u:(~east) $2048/move="east" $onStopped=1
+u:(~west) $2048/move="west" $onStopped=1
+# Replying to speech
+#u:(~hello) ~hello

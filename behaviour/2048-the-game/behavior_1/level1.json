@@ -1,0 +1,118 @@
+{
+    "level": [
+        {
+            "description": "you are in square 0",
+            "items": [
+                {
+                    "id": "clock",
+                    "direction": "west"
+                }
+            ],
+            "moves": [
+                "east",
+                "south"
+            ]
+        },
+        {
+            "description": "you are in square 1",
+            "moves": [
+                "east",
+                "west",
+                "south"
+            ]
+        },
+        {
+            "description": "you are in square 2",
+            "items": [
+                {
+                    "id": "charger",
+                    "direction": "east"
+                }
+            ],
+            "moves": [
+                "west",
+                "south"
+            ]
+        },
+        {
+            "description": "you are in square 3",
+            "moves": [
+                "north",
+                "east",
+                "south"
+            ]
+        },
+        {
+            "description": "you are in square 4",
+            "moves": [
+                "north",
+                "east",
+                "south",
+                "west"
+            ]
+        },
+        {
+            "description": "you are in square 5",
+            "moves": [
+                "north",
+                "south",
+                "west"
+            ]
+        },
+        {
+            "description": "you are in square 6",
+            "moves": [
+                "north",
+                "east"
+            ]
+        },
+        {
+            "description": "you are in square 7",
+            "moves": [
+                "north",
+                "east",
+                "west"
+            ]
+        },
+        {
+            "description": "you are in square 8",
+            "moves": [
+                "north",
+                "west"
+            ]
+        }
+        
+    ],
+    "items": [
+        {
+            "id": "clock",
+            "description": "a digital clock",
+            "detail": "the clock is frozen, the time shows 12 32 and 19 seconds 2084",
+            "use": "the time is 12 32 and 19 seconds 2084"
+        },
+        {
+            "id": "charger",
+            "description": "a robot charger connected to the wall",
+            "detail": "a sticker on the charger says it will recharge 10 power units",
+            "use": "the robots charging port opens"
+        },
+        {
+            "id": "body",
+            "description": "a shattered robot corpse is on the floor",
+            "detail": "the robots head has been removed",
+            "use": "you prod the robot but it doesn't move",
+            "items": [
+                "key"
+            ]
+        },
+        {
+            "id": "key",
+            "description": "an encryption key for level 1",
+            "detail": "a key that provides access to level 1",
+            "use": "you prod the robot but it doesn't move",
+            "items": [
+                "key"
+            ]
+        }
+    ]
+}

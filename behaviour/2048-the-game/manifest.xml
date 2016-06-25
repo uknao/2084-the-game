@@ -1,0 +1,24 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<package uuid="2048-the-game-688199" version="0.0.0">
+ <names>
+  <name lang="en_US">2048-the-game</name>
+  <name lang="en_US-x-scrald">2048-the-game</name>
+ </names>
+ <supportedLanguages>
+  <language>en_US</language>
+ </supportedLanguages>
+ <descriptionLanguages>
+  <language>en_US</language>
+ </descriptionLanguages>
+ <contents>
+  <behaviorContent path="behavior_1">
+   <userRequestable/>
+   <nature></nature>
+   <permissions/>
+  </behaviorContent>
+ </contents>
+ <requirements>
+  <naoqiRequirement maxVersion="2.4" minVersion="2.4"/>
+  <robotRequirement model="JULIETTE"/>
+ </requirements>
+</package>

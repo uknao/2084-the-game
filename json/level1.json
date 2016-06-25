@@ -1,0 +1,101 @@
+{
+    "level": [
+        {
+            "location": "1",
+            "type": "open",
+            "items": [
+                {
+                    "id": "clock",
+                    "direction": "west"
+                }
+            ],
+            "moves": [
+                "e",
+                "s"
+            ]
+        },
+        {
+            "location": "2",
+            "type": "open",
+            "moves": [
+                "e",
+                "w",
+                "s"
+            ]
+        },
+        {
+            "location": "3",
+            "type": "open",
+            "items": [
+                {
+                    "id": "charger",
+                    "direction": "east",
+                    
+                }
+            ],
+            "moves": [
+                "e",
+                "w",
+                "s"
+            ]
+        },
+        {
+            "location": "4",
+            "type": "open"
+        },
+        {
+            "location": "5",
+            "type": "open"
+        },
+        {
+            "location": "6",
+            "type": "open"
+        },
+        {
+            "location": "7",
+            "type": "open"
+        },
+        {
+            "location": "8",
+            "type": "lift"
+        },
+        {
+            "location": "9",
+            "type": "blocked"
+        },
+        
+    ],
+    "items": [
+        {
+            "id": "clock",
+            "description": "a digital clock",
+            "detail": "the clock is frozen, the time shows 12 32 and 19 seconds 2084",
+            "use": "the time is 12 32 and 19 seconds 2084"
+        },
+        {
+            "id": "charger",
+            "description": "a robot charger connected to the wall",
+            "detail": "a sticker on the charger says it will recharge 10 power units",
+            "use": "the robots charging port opens"
+        },
+        {
+            "id": "body",
+            "description": "a shattered robot corpse is on the floor",
+            "detail": "the robots head has been removed",
+            "use": "you prod the robot but it doesn't move",
+            "items": [
+                "key"
+            ],
+            
+        },
+        {
+            "id": "key",
+            "description": "an encryption key for level 1",
+            "detail": "a key that provides access to level 1",
+            "use": "you prod the robot but it doesn't move",
+            "items": [
+                "key"
+            ]
+        }
+    ]
+}
