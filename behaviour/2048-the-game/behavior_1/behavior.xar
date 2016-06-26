@@ -990,9 +990,7 @@ class MyClass(GeneratedClass):
         self.memory.insertData("2048/current_position", new_position)
         self.memory.insertData("2048/current_items", self.get_items(level_data, new_position))
 
-        if new_position == goal:
-            self.onReachedGoal()
-        elif move == "north":
+        if move == "north":
             self.moveNorth()
         elif move == "east":
             self.moveEast()

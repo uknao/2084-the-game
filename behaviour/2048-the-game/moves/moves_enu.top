@@ -18,10 +18,10 @@ u:(~west) $2048/move="west" $onMove=1
 
 u:(~look) $onLookAround=1
 
-u:(use _~2084items) $2048/use_item=$1 $onUse=1
+u:(use _~2084items) $2048/use_item=$1 $onUse=1 ^wait(Stand/Waiting/PlayHands_3/behavior.xar)
 
-u:(examine _~2084items) $2048/examine_item=$1 $onExamine=1
+u:(examine _~2084items) $2048/examine_item=$1 $onExamine=1 ^wait(Stand/Waiting/LookHand_1/behavior.xar)
 
-u:(take _~2084items) $2048/pick_up_item=$1 $onPickUp=1
+u:(take _~2084items) $2048/pick_up_item=$1 $onPickUp=1 ^wait(Stand/Gestures/Take_1/behavior.xar)
 
-u:(drop _~2084items) $2048/drop_item=$1 $onDrop=1
+u:(drop _~2084items) $2048/drop_item=$1 $onDrop=1 ^wait(Stand/point_right_move/behavior.xar)
