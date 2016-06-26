@@ -6,12 +6,21 @@ concept:(north) ["move north" "go north"]
 concept:(south) ["move south" "go south"]
 concept:(east) ["move east" "go east"]
 concept:(west) ["move west" "go west"]
-
+concept:(look) ["look" "look around" "where am I?"]
+dynamic:2084items
 # Catching inputs and triggering outputs
 #u:(e:onStart) $onStopped=1
-u:(~north) $2048/move="north" $onStopped=1
-u:(~south) $2048/move="south" $onStopped=1
-u:(~east) $2048/move="east" $onStopped=1
-u:(~west) $2048/move="west" $onStopped=1
-# Replying to speech
-#u:(~hello) ~hello
+u:(~north) $2048/move="north" $onMove=1
+u:(~south) $2048/move="south" $onMove=1
+u:(~east) $2048/move="east" $onMove=1
+u:(~west) $2048/move="west" $onMove=1
+
+u:(~look) $onLookAround=1
+
+u:(use _~2084items) $2048/use_item=$1 $onUse=1
+
+u:(examine _~2084items) $2048/examine_item=$1 $onExamine=1
+
+u:(pick up _~2084items) $2048/pick_up_item=$1 $onPickUp=1
+
+u:(drop _~2084items) $2048/drop_item=$1 $onDrop=1

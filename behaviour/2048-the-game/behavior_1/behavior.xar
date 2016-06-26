@@ -30,7 +30,7 @@
                                 <BehaviorLayer name="behavior_layer1">
                                     <BehaviorKeyframe name="Setup" index="1">
                                         <Diagram>
-                                            <Box name="Goto (name)" id="1" localization="8" tooltip="Jump to the frame name set in parameters." x="179" y="58">
+                                            <Box name="Goto (name)" id="1" localization="8" tooltip="Jump to the frame name set in parameters." x="377" y="282">
                                                 <bitmap>media/images/box/box-timeLine.png</bitmap>
                                                 <script language="4">
                                                     <content>
@@ -46,7 +46,7 @@
                                                 <Input name="onGo" type="1" type_size="1" nature="1" inner="0" tooltip="Parent timeline gotoTimeline when a signal is received on this input." id="2" />
                                                 <Parameter name="Frame name" inherits_from_parent="0" content_type="3" value="Introduction" default_value="" custom_choice="0" tooltip="Name of the frame you want to go to." id="3" />
                                             </Box>
-                                            <Box name="Stop" id="2" localization="8" tooltip="Stop the parent timeline at the current frame index.&#x0A;&#x0A;!!Warning!! This box does not stop the behavior! It is only the timeline which will&#x0A;stop playing, the keyframes and boxes will still be running." x="170" y="183">
+                                            <Box name="Stop" id="2" localization="8" tooltip="Stop the parent timeline at the current frame index.&#x0A;&#x0A;!!Warning!! This box does not stop the behavior! It is only the timeline which will&#x0A;stop playing, the keyframes and boxes will still be running." x="340" y="173">
                                                 <bitmap>media/images/box/box-timeLine.png</bitmap>
                                                 <script language="4">
                                                     <content>
@@ -61,8 +61,100 @@
                                                 <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
                                                 <Input name="onStop" type="1" type_size="1" nature="1" inner="0" tooltip="Parent timeline stops when a signal is received on this input." id="2" />
                                             </Box>
-                                            <Link inputowner="1" indexofinput="2" outputowner="0" indexofoutput="1" />
+                                            <Box name="Set Language" id="3" localization="8" tooltip="Select the language you would like the robot to speak and understand. Any following call to&#x0A;ALSpeechRecognition (Speech Reco. box for instance) or ALTextToSpeech (Say box&#x0A;for instance) will use this language." x="174" y="298">
+                                                <bitmap>media/images/box/interaction/say.png</bitmap>
+                                                <script language="4">
+                                                    <content>
+                                                        <![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self, False)
+
+    def onLoad(self):
+        try:
+            self.tts = ALProxy("ALTextToSpeech")
+        except:
+            self.logger.warn("ALTextToSpeech is not available, language setting cannot be applied to speech")
+            self.tts = None
+
+        try:
+            self.asr = ALProxy("ALSpeechRecognition")
+        except:
+            self.logger.warn("ALSpeechRecognition is not available, language setting cannot be applied to recognition")
+            self.asr = None
+
+        try:
+            self.dialog = ALProxy("ALDialog")
+        except:
+            self.logger.warn("ALDialog is not available, language setting cannot be applied to dialog")
+            self.dialog = None
+
+    def onInput_onSet(self):
+        lang = self.getParameter("Language")
+        try:
+            if self.asr:
+                self.asr.setLanguage( self.getParameter("Language") )
+            if self.tts:
+                self.tts.setLanguage( self.getParameter("Language") )
+            if self.dialog:
+                self.dialog.setLanguage( self.getParameter("Language") )
+            if self.tts is None and self.asr is None and self.dialog is None:
+                raise RuntimeError("Cannot set language: neither ALTextToSpeech nor ALSpeechRecognition nor ALDialog is available.")
+            self.onReady()
+        except:
+            error = "Language " + lang + " cannot be set."
+            self.logger.warn(error)
+            self.onError(error)]]>
+</content>
+                                                </script>
+                                                <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
+                                                <Input name="onSet" type="1" type_size="1" nature="1" inner="0" tooltip="The data is set when a signal is received on this input." id="2" />
+                                                <Output name="onReady" type="1" type_size="1" nature="2" inner="0" tooltip="Signal sent when the data has been set." id="3" />
+                                                <Output name="onError" type="3" type_size="1" nature="2" inner="0" tooltip="Error output:&#x0A;- triggered if the language asked cannot be set" id="4" />
+                                                <Parameter name="Language" inherits_from_parent="0" content_type="3" value="English" default_value="English" custom_choice="1" tooltip="Set the language the robot speaks and understands." id="5">
+                                                    <Choice value="Arabic" />
+                                                    <Choice value="Brazilian" />
+                                                    <Choice value="Chinese" />
+                                                    <Choice value="Czech" />
+                                                    <Choice value="Danish" />
+                                                    <Choice value="Dutch" />
+                                                    <Choice value="English" />
+                                                    <Choice value="Finnish" />
+                                                    <Choice value="French" />
+                                                    <Choice value="German" />
+                                                    <Choice value="Greek" />
+                                                    <Choice value="Italian" />
+                                                    <Choice value="Japanese" />
+                                                    <Choice value="Korean" />
+                                                    <Choice value="Norwegian" />
+                                                    <Choice value="Polish" />
+                                                    <Choice value="Portuguese" />
+                                                    <Choice value="Russian" />
+                                                    <Choice value="Spanish" />
+                                                    <Choice value="Swedish" />
+                                                    <Choice value="Turkish" />
+                                                </Parameter>
+                                                <Resource name="Speech" type="Lock" timeout="0" />
+                                            </Box>
+                                            <Box name="Goto (name) (1)" id="4" localization="8" tooltip="Jump to the frame name set in parameters." x="332" y="403">
+                                                <bitmap>media/images/box/box-timeLine.png</bitmap>
+                                                <script language="4">
+                                                    <content>
+                                                        <![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self, False)
+
+    def onInput_onGo(self):
+        self.getParentTimeline().goTo(self.getParameter("Frame name"))]]>
+</content>
+                                                </script>
+                                                <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
+                                                <Input name="onGo" type="1" type_size="1" nature="1" inner="0" tooltip="Parent timeline gotoTimeline when a signal is received on this input." id="2" />
+                                                <Parameter name="Frame name" inherits_from_parent="0" content_type="3" value="Exit" default_value="" custom_choice="0" tooltip="Name of the frame you want to go to." id="3" />
+                                            </Box>
+                                            <Link inputowner="3" indexofinput="2" outputowner="0" indexofoutput="1" />
                                             <Link inputowner="2" indexofinput="2" outputowner="0" indexofoutput="1" />
+                                            <Link inputowner="1" indexofinput="2" outputowner="3" indexofoutput="3" />
+                                            <Link inputowner="4" indexofinput="2" outputowner="3" indexofoutput="4" />
                                         </Diagram>
                                     </BehaviorKeyframe>
                                     <BehaviorKeyframe name="Introduction" index="15">
@@ -185,7 +277,7 @@ class MyClass(GeneratedClass):
 
 		self.tts = ALProxy("ALTextToSpeech")
 		self.sentences = {
-			"Arabic" : " مرحبا ",
+			"Arabic" : "  ",
 			"Czech" : " Ahoj ",
 			"Danish" : " Hej ",
 			"German" : " Hallo ",
@@ -215,7 +307,7 @@ class MyClass(GeneratedClass):
                                                                     </script>
                                                                     <pluginContent>
                                                                         <arabic>
-                                                                            <![CDATA[مرحبا]]>
+                                                                            <![CDATA[]]>
 </arabic>
                                                                         <czech>
                                                                             <![CDATA[Ahoj]]>
@@ -277,7 +369,7 @@ class MyClass(GeneratedClass):
                                                                         <chinese>
                                                                             <![CDATA[你好]]>
 </chinese>
-                                                                        <language>5</language>
+                                                                        <language>6</language>
                                                                     </pluginContent>
                                                                     <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
                                                                     <Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Data is sent on the output when this input is stimulated." id="2" />
@@ -298,7 +390,7 @@ class MyClass(GeneratedClass):
                                     </BehaviorKeyframe>
                                     <BehaviorKeyframe name="Game" index="32">
                                         <Diagram>
-                                            <Box name="Level" id="1" localization="8" tooltip="" x="364" y="54">
+                                            <Box name="Level" id="1" localization="8" tooltip="" x="362" y="142">
                                                 <bitmap>media/images/box/box-timeLine.png</bitmap>
                                                 <script language="4">
                                                     <content>
@@ -368,8 +460,14 @@ class MyClass(GeneratedClass):
         level_data = json.loads(self.memory.getData("2048/level"))
         position_index = self.memory.getData("2048/current_position")
         position_data = level_data[position_index]
+        inventory = self.memory.getData("2048/inventory")
 
-        #self.logger.info(position_data)
+        current_items = self.memory.getData("2048/current_items")
+
+        self.logger.info("Postion: " + str(position_index))
+        self.logger.info("Items: " + str(current_items))
+        self.logger.info("Inventory: " + str(inventory))
+
         self.tts.say(str(position_data["description"]))
         self.onStopped()
 
@@ -391,7 +489,7 @@ class MyClass(GeneratedClass):
                                                         </BehaviorKeyframe>
                                                         <BehaviorKeyframe name="Get Command" index="23">
                                                             <Diagram>
-                                                                <Box name="Goto (name)" id="1" localization="8" tooltip="Jump to the frame name set in parameters." x="269" y="59">
+                                                                <Box name="Goto (name)" id="1" localization="8" tooltip="Jump to the frame name set in parameters." x="374" y="17">
                                                                     <bitmap>media/images/box/box-timeLine.png</bitmap>
                                                                     <script language="4">
                                                                         <content>
@@ -407,7 +505,68 @@ class MyClass(GeneratedClass):
                                                                     <Input name="onGo" type="1" type_size="1" nature="1" inner="0" tooltip="Parent timeline gotoTimeline when a signal is received on this input." id="2" />
                                                                     <Parameter name="Frame name" inherits_from_parent="0" content_type="3" value="Move" default_value="" custom_choice="0" tooltip="Name of the frame you want to go to." id="3" />
                                                                 </Box>
-                                                                <Box name="Dialog" id="4" localization="8" tooltip="An example of multilanguage dialog implementation" x="93" y="57">
+                                                                <Box name="Goto (name) (1)" id="2" localization="8" tooltip="Jump to the frame name set in parameters." x="375" y="119">
+                                                                    <bitmap>media/images/box/box-timeLine.png</bitmap>
+                                                                    <script language="4">
+                                                                        <content>
+                                                                            <![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self, False)
+
+    def onInput_onGo(self):
+        self.getParentTimeline().goTo(self.getParameter("Frame name"))]]>
+</content>
+                                                                    </script>
+                                                                    <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
+                                                                    <Input name="onGo" type="1" type_size="1" nature="1" inner="0" tooltip="Parent timeline gotoTimeline when a signal is received on this input." id="2" />
+                                                                    <Parameter name="Frame name" inherits_from_parent="0" content_type="3" value="Describe" default_value="" custom_choice="0" tooltip="Name of the frame you want to go to." id="3" />
+                                                                </Box>
+                                                                <Box name="Set Items" id="3" localization="8" tooltip="" x="70" y="71">
+                                                                    <bitmap>media/images/box/box-python-script.png</bitmap>
+                                                                    <script language="4">
+                                                                        <content>
+                                                                            <![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self)
+
+    def onLoad(self):
+        #put initialization code here
+        self.dialog = ALProxy("ALDialog")
+        self.memory = ALProxy("ALMemory")
+
+    def onUnload(self):
+        #put clean-up code here
+        pass
+
+    def onInput_onStart(self):
+        #self.onStopped() #activate the output of the box
+
+
+        self.memory.insertData("2048/move", None)
+        self.memory.insertData("2048/use_item", None)
+        self.memory.insertData("2048/examine_item", None)
+        self.memory.insertData("2048/pick_up_item", None)
+        self.memory.insertData("2048/drop_item", None)
+
+        inventory = self.memory.getData("2048/inventory")
+        current_items = self.memory.getData("2048/current_items")
+        all_items = inventory + current_items
+        self.logger.info("Actionable items: " + str(all_items))
+        self.dialog.setConcept("2084items", "enu", all_items)
+        self.onStopped()
+
+
+    def onInput_onStop(self):
+        self.onUnload() #it is recommended to reuse the clean-up as the box is stopped
+        self.onStopped() #activate the output of the box]]>
+</content>
+                                                                    </script>
+                                                                    <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
+                                                                    <Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" />
+                                                                    <Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" />
+                                                                    <Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" />
+                                                                </Box>
+                                                                <Box name="Dialog" id="4" localization="8" tooltip="An example of multilanguage dialog implementation" x="226" y="96">
                                                                     <dialogFile>../moves/moves.dlg</dialogFile>
                                                                     <bitmap>media/images/box/box-dialog.png</bitmap>
                                                                     <script language="4">
@@ -418,12 +577,87 @@ class MyClass(GeneratedClass):
                                                                     <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
                                                                     <Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" />
                                                                     <Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" />
-                                                                    <Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" />
+                                                                    <Output name="onMove" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" />
+                                                                    <Output name="onLookAround" type="1" type_size="1" nature="1" inner="0" tooltip="" id="5" />
+                                                                    <Output name="onUse" type="1" type_size="1" nature="1" inner="0" tooltip="" id="6" />
+                                                                    <Output name="onExamine" type="1" type_size="1" nature="1" inner="0" tooltip="" id="7" />
+                                                                    <Output name="onPickUp" type="1" type_size="1" nature="1" inner="0" tooltip="" id="8" />
+                                                                    <Output name="onDrop" type="1" type_size="1" nature="1" inner="0" tooltip="" id="9" />
                                                                     <Resource name="Speech" type="Lock" timeout="0" />
                                                                     <Resource name="Speech recognition" type="Lock" timeout="0" />
                                                                 </Box>
-                                                                <Link inputowner="4" indexofinput="2" outputowner="0" indexofoutput="1" />
+                                                                <Box name="Goto (name) (2)" id="5" localization="8" tooltip="Jump to the frame name set in parameters." x="383" y="219">
+                                                                    <bitmap>media/images/box/box-timeLine.png</bitmap>
+                                                                    <script language="4">
+                                                                        <content>
+                                                                            <![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self, False)
+
+    def onInput_onGo(self):
+        self.getParentTimeline().goTo(self.getParameter("Frame name"))]]>
+</content>
+                                                                    </script>
+                                                                    <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
+                                                                    <Input name="onGo" type="1" type_size="1" nature="1" inner="0" tooltip="Parent timeline gotoTimeline when a signal is received on this input." id="2" />
+                                                                    <Parameter name="Frame name" inherits_from_parent="0" content_type="3" value="Use" default_value="" custom_choice="0" tooltip="Name of the frame you want to go to." id="3" />
+                                                                </Box>
+                                                                <Box name="Goto (name) (3)" id="6" localization="8" tooltip="Jump to the frame name set in parameters." x="386" y="323">
+                                                                    <bitmap>media/images/box/box-timeLine.png</bitmap>
+                                                                    <script language="4">
+                                                                        <content>
+                                                                            <![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self, False)
+
+    def onInput_onGo(self):
+        self.getParentTimeline().goTo(self.getParameter("Frame name"))]]>
+</content>
+                                                                    </script>
+                                                                    <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
+                                                                    <Input name="onGo" type="1" type_size="1" nature="1" inner="0" tooltip="Parent timeline gotoTimeline when a signal is received on this input." id="2" />
+                                                                    <Parameter name="Frame name" inherits_from_parent="0" content_type="3" value="Examine" default_value="" custom_choice="0" tooltip="Name of the frame you want to go to." id="3" />
+                                                                </Box>
+                                                                <Box name="Goto (name) (4)" id="7" localization="8" tooltip="Jump to the frame name set in parameters." x="384" y="434">
+                                                                    <bitmap>media/images/box/box-timeLine.png</bitmap>
+                                                                    <script language="4">
+                                                                        <content>
+                                                                            <![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self, False)
+
+    def onInput_onGo(self):
+        self.getParentTimeline().goTo(self.getParameter("Frame name"))]]>
+</content>
+                                                                    </script>
+                                                                    <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
+                                                                    <Input name="onGo" type="1" type_size="1" nature="1" inner="0" tooltip="Parent timeline gotoTimeline when a signal is received on this input." id="2" />
+                                                                    <Parameter name="Frame name" inherits_from_parent="0" content_type="3" value="Pick Up" default_value="" custom_choice="0" tooltip="Name of the frame you want to go to." id="3" />
+                                                                </Box>
+                                                                <Box name="Goto (name) (5)" id="8" localization="8" tooltip="Jump to the frame name set in parameters." x="385" y="541">
+                                                                    <bitmap>media/images/box/box-timeLine.png</bitmap>
+                                                                    <script language="4">
+                                                                        <content>
+                                                                            <![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self, False)
+
+    def onInput_onGo(self):
+        self.getParentTimeline().goTo(self.getParameter("Frame name"))]]>
+</content>
+                                                                    </script>
+                                                                    <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
+                                                                    <Input name="onGo" type="1" type_size="1" nature="1" inner="0" tooltip="Parent timeline gotoTimeline when a signal is received on this input." id="2" />
+                                                                    <Parameter name="Frame name" inherits_from_parent="0" content_type="3" value="Drop" default_value="" custom_choice="0" tooltip="Name of the frame you want to go to." id="3" />
+                                                                </Box>
+                                                                <Link inputowner="3" indexofinput="2" outputowner="0" indexofoutput="1" />
+                                                                <Link inputowner="4" indexofinput="2" outputowner="3" indexofoutput="4" />
                                                                 <Link inputowner="1" indexofinput="2" outputowner="4" indexofoutput="4" />
+                                                                <Link inputowner="2" indexofinput="2" outputowner="4" indexofoutput="5" />
+                                                                <Link inputowner="5" indexofinput="2" outputowner="4" indexofoutput="6" />
+                                                                <Link inputowner="6" indexofinput="2" outputowner="4" indexofoutput="7" />
+                                                                <Link inputowner="7" indexofinput="2" outputowner="4" indexofoutput="8" />
+                                                                <Link inputowner="8" indexofinput="2" outputowner="4" indexofoutput="9" />
                                                             </Diagram>
                                                         </BehaviorKeyframe>
                                                         <BehaviorKeyframe name="Move" index="45">
@@ -530,7 +764,7 @@ class MyClass(GeneratedClass):
 
 		self.tts = ALProxy("ALTextToSpeech")
 		self.sentences = {
-			"Arabic" : " مرحبا ",
+			"Arabic" : "  ",
 			"Czech" : " Ahoj ",
 			"Danish" : " Hej ",
 			"German" : " Hallo ",
@@ -560,7 +794,7 @@ class MyClass(GeneratedClass):
                                                                                         </script>
                                                                                         <pluginContent>
                                                                                             <arabic>
-                                                                                                <![CDATA[مرحبا]]>
+                                                                                                <![CDATA[]]>
 </arabic>
                                                                                             <czech>
                                                                                                 <![CDATA[Ahoj]]>
@@ -622,7 +856,7 @@ class MyClass(GeneratedClass):
                                                                                             <chinese>
                                                                                                 <![CDATA[你好]]>
 </chinese>
-                                                                                            <language>5</language>
+                                                                                            <language>6</language>
                                                                                         </pluginContent>
                                                                                         <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
                                                                                         <Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Data is sent on the output when this input is stimulated." id="2" />
@@ -653,7 +887,7 @@ class MyClass(GeneratedClass):
                                                                     <Input name="onGo" type="1" type_size="1" nature="1" inner="0" tooltip="Parent timeline gotoTimeline when a signal is received on this input." id="2" />
                                                                     <Parameter name="Frame name" inherits_from_parent="0" content_type="3" value="Get Command" default_value="" custom_choice="0" tooltip="Name of the frame you want to go to." id="3" />
                                                                 </Box>
-                                                                <Box name="Move" id="4" localization="8" tooltip="" x="270" y="92">
+                                                                <Box name="Move" id="4" localization="8" tooltip="" x="232" y="86">
                                                                     <bitmap>media/images/box/box-python-script.png</bitmap>
                                                                     <script language="4">
                                                                         <content>
@@ -679,17 +913,19 @@ class MyClass(GeneratedClass):
         level_data = json.loads(self.memory.getData("2048/level"))
         position_index = self.memory.getData("2048/current_position")
         position_data = level_data[position_index]
-
-        self.logger.info(move)
-        self.logger.info(str(level_data))
-
         moves = position_data["moves"]
-        self.logger.info(str(moves))
+
+        self.logger.info("Available moves: " + str(moves))
+        self.logger.info("Moving " + move)
+
+
         if move not in moves:
-            self.onError()
+            self.onStopped("invalid move")
+            return
 
         new_position = self.calculate_new_position(move, position_index)
         self.memory.insertData("2048/current_position", new_position)
+        self.memory.insertData("2048/current_items", self.get_items(level_data, new_position))
 
         if move == "north":
             self.moveNorth()
@@ -719,17 +955,26 @@ class MyClass(GeneratedClass):
 
         new_position = (row * 3) + col
         self.logger.info("moving from %d to %d" %(current_position, new_position))
-        return new_position]]>
+        return new_position
+
+    def get_items(self, position_list, current_position):
+        item_list = []
+        if "items" in position_list[current_position]:
+          item_list = [str(i) for i in position_list[current_position]["items"]]
+
+        self.logger.info("Items in current position: "+ str(item_list))
+        return item_list]]>
 </content>
                                                                     </script>
                                                                     <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
                                                                     <Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" />
                                                                     <Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" />
-                                                                    <Output name="onError" type="3" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" />
-                                                                    <Output name="moveNorth" type="1" type_size="1" nature="2" inner="0" tooltip="" id="5" />
-                                                                    <Output name="moveEast" type="1" type_size="1" nature="2" inner="0" tooltip="" id="6" />
-                                                                    <Output name="moveSouth" type="1" type_size="1" nature="2" inner="0" tooltip="" id="7" />
-                                                                    <Output name="moveWest" type="1" type_size="1" nature="2" inner="0" tooltip="" id="8" />
+                                                                    <Output name="onStopped" type="3" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" />
+                                                                    <Output name="moveNorth" type="1" type_size="1" nature="1" inner="0" tooltip="" id="5" />
+                                                                    <Output name="moveEast" type="1" type_size="1" nature="1" inner="0" tooltip="" id="6" />
+                                                                    <Output name="moveSouth" type="1" type_size="1" nature="1" inner="0" tooltip="" id="7" />
+                                                                    <Output name="moveWest" type="1" type_size="1" nature="1" inner="0" tooltip="" id="8" />
+                                                                    <Output name="onReachedGoal" type="1" type_size="1" nature="1" inner="0" tooltip="" id="9" />
                                                                 </Box>
                                                                 <Box name="Say (1)" id="3" localization="8" tooltip="Say some text. Note that you must open the box to enter the text." x="484" y="225">
                                                                     <bitmap>media/images/box/interaction/say.png</bitmap>
@@ -833,7 +1078,7 @@ class MyClass(GeneratedClass):
 
 		self.tts = ALProxy("ALTextToSpeech")
 		self.sentences = {
-			"Arabic" : " مرحبا ",
+			"Arabic" : "  ",
 			"Czech" : " Ahoj ",
 			"Danish" : " Hej ",
 			"German" : " Hallo ",
@@ -863,7 +1108,7 @@ class MyClass(GeneratedClass):
                                                                                         </script>
                                                                                         <pluginContent>
                                                                                             <arabic>
-                                                                                                <![CDATA[مرحبا]]>
+                                                                                                <![CDATA[]]>
 </arabic>
                                                                                             <czech>
                                                                                                 <![CDATA[Ahoj]]>
@@ -925,7 +1170,7 @@ class MyClass(GeneratedClass):
                                                                                             <chinese>
                                                                                                 <![CDATA[你好]]>
 </chinese>
-                                                                                            <language>5</language>
+                                                                                            <language>6</language>
                                                                                         </pluginContent>
                                                                                         <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
                                                                                         <Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Data is sent on the output when this input is stimulated." id="2" />
@@ -1042,7 +1287,7 @@ class MyClass(GeneratedClass):
 
 		self.tts = ALProxy("ALTextToSpeech")
 		self.sentences = {
-			"Arabic" : " مرحبا ",
+			"Arabic" : "  ",
 			"Czech" : " Ahoj ",
 			"Danish" : " Hej ",
 			"German" : " Hallo ",
@@ -1072,7 +1317,7 @@ class MyClass(GeneratedClass):
                                                                                         </script>
                                                                                         <pluginContent>
                                                                                             <arabic>
-                                                                                                <![CDATA[مرحبا]]>
+                                                                                                <![CDATA[]]>
 </arabic>
                                                                                             <czech>
                                                                                                 <![CDATA[Ahoj]]>
@@ -1134,7 +1379,7 @@ class MyClass(GeneratedClass):
                                                                                             <chinese>
                                                                                                 <![CDATA[你好]]>
 </chinese>
-                                                                                            <language>5</language>
+                                                                                            <language>6</language>
                                                                                         </pluginContent>
                                                                                         <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
                                                                                         <Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Data is sent on the output when this input is stimulated." id="2" />
@@ -1251,7 +1496,7 @@ class MyClass(GeneratedClass):
 
 		self.tts = ALProxy("ALTextToSpeech")
 		self.sentences = {
-			"Arabic" : " مرحبا ",
+			"Arabic" : "  ",
 			"Czech" : " Ahoj ",
 			"Danish" : " Hej ",
 			"German" : " Hallo ",
@@ -1281,7 +1526,7 @@ class MyClass(GeneratedClass):
                                                                                         </script>
                                                                                         <pluginContent>
                                                                                             <arabic>
-                                                                                                <![CDATA[مرحبا]]>
+                                                                                                <![CDATA[]]>
 </arabic>
                                                                                             <czech>
                                                                                                 <![CDATA[Ahoj]]>
@@ -1343,7 +1588,7 @@ class MyClass(GeneratedClass):
                                                                                             <chinese>
                                                                                                 <![CDATA[你好]]>
 </chinese>
-                                                                                            <language>5</language>
+                                                                                            <language>6</language>
                                                                                         </pluginContent>
                                                                                         <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
                                                                                         <Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Data is sent on the output when this input is stimulated." id="2" />
@@ -1460,7 +1705,7 @@ class MyClass(GeneratedClass):
 
 		self.tts = ALProxy("ALTextToSpeech")
 		self.sentences = {
-			"Arabic" : " مرحبا ",
+			"Arabic" : "  ",
 			"Czech" : " Ahoj ",
 			"Danish" : " Hej ",
 			"German" : " Hallo ",
@@ -1490,7 +1735,7 @@ class MyClass(GeneratedClass):
                                                                                         </script>
                                                                                         <pluginContent>
                                                                                             <arabic>
-                                                                                                <![CDATA[مرحبا]]>
+                                                                                                <![CDATA[]]>
 </arabic>
                                                                                             <czech>
                                                                                                 <![CDATA[Ahoj]]>
@@ -1552,7 +1797,7 @@ class MyClass(GeneratedClass):
                                                                                             <chinese>
                                                                                                 <![CDATA[你好]]>
 </chinese>
-                                                                                            <language>5</language>
+                                                                                            <language>6</language>
                                                                                         </pluginContent>
                                                                                         <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
                                                                                         <Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Data is sent on the output when this input is stimulated." id="2" />
@@ -1583,9 +1828,88 @@ class MyClass(GeneratedClass):
                                                                     <Input name="onGo" type="1" type_size="1" nature="1" inner="0" tooltip="Parent timeline gotoTimeline when a signal is received on this input." id="2" />
                                                                     <Parameter name="Frame name" inherits_from_parent="0" content_type="3" value="Describe" default_value="" custom_choice="0" tooltip="Name of the frame you want to go to." id="3" />
                                                                 </Box>
+                                                                <Box name="Log" id="9" localization="8" tooltip="Prompt the message in the debug window. You can set a prefix and a priority&#x0A;for the message in the parameters." x="412" y="19">
+                                                                    <bitmap>media/images/box/print.png</bitmap>
+                                                                    <script language="4">
+                                                                        <content>
+                                                                            <![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self, False)
+
+    def onLoad(self):
+        #~ puts code for box initialization here
+        pass
+
+    def onUnload(self):
+        #~ puts code for box cleanup here
+        pass
+
+    def onInput_message(self, p):
+        sPriority = self.getParameter("Priority")
+        sMessage = self.getParameter("Message prefix")
+        if( sMessage != "" and p != None ):
+            sMessage += ": "
+        if( p != None ):
+            sMessage += str(p)
+        if( sPriority == "Fatal" ):
+            self.logger.fatal( sMessage )
+        elif( sPriority == "Error" ):
+            self.logger.error( sMessage )
+        elif( sPriority == "Warning" ):
+            self.logger.warning( sMessage )
+        elif( sPriority == "Info" ):
+            self.logger.info( sMessage )
+        elif( sPriority == "Debug" ):
+            self.logger.debug( sMessage )
+        self.onDone()]]>
+</content>
+                                                                    </script>
+                                                                    <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
+                                                                    <Input name="message" type="0" type_size="1" nature="1" inner="0" tooltip='The message to print or a &quot;Bang&quot; to only print the message set as parameter.' id="2" />
+                                                                    <Output name="onDone" type="1" type_size="1" nature="2" inner="0" tooltip="Signal sent when box behavior is finished." id="3" />
+                                                                    <Parameter name="Message prefix" inherits_from_parent="0" content_type="3" value="Message text" default_value="Message text" custom_choice="0" tooltip="Enter the text you want to print before the input message." id="4" />
+                                                                    <Parameter name="Priority" inherits_from_parent="0" content_type="3" value="Info" default_value="Info" custom_choice="0" tooltip="Enter the priority of your message. If you select error, the box will get red when it will be stimulated." id="5">
+                                                                        <Choice value="Fatal" />
+                                                                        <Choice value="Error" />
+                                                                        <Choice value="Warning" />
+                                                                        <Choice value="Info" />
+                                                                        <Choice value="Debug" />
+                                                                    </Parameter>
+                                                                </Box>
+                                                                <Box name="Goal Reached" id="10" localization="8" tooltip="" x="446" y="685">
+                                                                    <bitmap>media/images/box/box-python-script.png</bitmap>
+                                                                    <script language="4">
+                                                                        <content>
+                                                                            <![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self)
+
+    def onLoad(self):
+        #put initialization code here
+        self.memory = ALProxy("ALMemory")
+        self.tts = ALProxy("ALAnimatedSpeech")
+
+    def onUnload(self):
+        #put clean-up code here
+        pass
+
+    def onInput_onStart(self):
+        #self.onStopped() #activate the output of the box
+        success_message = self.memory.getData("2048/success")
+        self.tts.say(success_message)
+
+    def onInput_onStop(self):
+        self.onUnload() #it is recommended to reuse the clean-up as the box is stopped
+        self.onStopped() #activate the output of the box]]>
+</content>
+                                                                    </script>
+                                                                    <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
+                                                                    <Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" />
+                                                                    <Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" />
+                                                                    <Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" />
+                                                                </Box>
                                                                 <Link inputowner="2" indexofinput="2" outputowner="1" indexofoutput="4" />
                                                                 <Link inputowner="1" indexofinput="2" outputowner="4" indexofoutput="4" />
-                                                                <Link inputowner="4" indexofinput="2" outputowner="0" indexofoutput="1" />
                                                                 <Link inputowner="3" indexofinput="2" outputowner="4" indexofoutput="5" />
                                                                 <Link inputowner="5" indexofinput="2" outputowner="4" indexofoutput="6" />
                                                                 <Link inputowner="6" indexofinput="2" outputowner="4" indexofoutput="7" />
@@ -1594,24 +1918,374 @@ class MyClass(GeneratedClass):
                                                                 <Link inputowner="8" indexofinput="2" outputowner="5" indexofoutput="4" />
                                                                 <Link inputowner="8" indexofinput="2" outputowner="6" indexofoutput="4" />
                                                                 <Link inputowner="8" indexofinput="2" outputowner="7" indexofoutput="4" />
+                                                                <Link inputowner="9" indexofinput="2" outputowner="4" indexofoutput="4" />
+                                                                <Link inputowner="10" indexofinput="2" outputowner="4" indexofoutput="9" />
+                                                                <Link inputowner="0" indexofinput="4" outputowner="10" indexofoutput="4" />
+                                                                <Link inputowner="4" indexofinput="2" outputowner="0" indexofoutput="1" />
                                                             </Diagram>
                                                         </BehaviorKeyframe>
                                                         <BehaviorKeyframe name="Examine" index="59">
-                                                            <Diagram />
+                                                            <Diagram>
+                                                                <Box name="Examine" id="1" localization="8" tooltip="" x="131" y="51">
+                                                                    <bitmap>media/images/box/box-python-script.png</bitmap>
+                                                                    <script language="4">
+                                                                        <content>
+                                                                            <![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self)
+
+    def onLoad(self):
+        #put initialization code here
+        self.memory = ALProxy("ALMemory")
+        self.tts = ALProxy("ALAnimatedSpeech")
+
+    def onUnload(self):
+        #put clean-up code here
+        pass
+
+    def onInput_onStart(self):
+        #self.onStopped() #activate the output of the box
+        item_id = self.memory.getData("2048/examine_item")
+        item_data = json.loads(self.memory.getData("2048/items"))
+
+        item = self.get_item_details(item_data, item_id)
+
+        self.logger.info("Examining: " + item_id)
+        self.logger.info("Item details: " + str(item))
+
+        if item:
+            self.tts.say(str(item["examine"]))
+        else:
+            self.tts.say("I don't know what that is")
+        self.onStopped()
+
+    def onInput_onStop(self):
+        self.onUnload() #it is recommended to reuse the clean-up as the box is stopped
+        self.onStopped() #activate the output of the box
+
+    def get_item_details(self, item_data, item_id):
+        return next((i for i in item_data if i["id"] == item_id), None)]]>
+</content>
+                                                                    </script>
+                                                                    <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
+                                                                    <Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" />
+                                                                    <Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" />
+                                                                    <Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" />
+                                                                </Box>
+                                                                <Box name="Goto (name)" id="2" localization="8" tooltip="Jump to the frame name set in parameters." x="308" y="62">
+                                                                    <bitmap>media/images/box/box-timeLine.png</bitmap>
+                                                                    <script language="4">
+                                                                        <content>
+                                                                            <![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self, False)
+
+    def onInput_onGo(self):
+        self.getParentTimeline().goTo(self.getParameter("Frame name"))]]>
+</content>
+                                                                    </script>
+                                                                    <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
+                                                                    <Input name="onGo" type="1" type_size="1" nature="1" inner="0" tooltip="Parent timeline gotoTimeline when a signal is received on this input." id="2" />
+                                                                    <Parameter name="Frame name" inherits_from_parent="0" content_type="3" value="Get Command" default_value="" custom_choice="0" tooltip="Name of the frame you want to go to." id="3" />
+                                                                </Box>
+                                                                <Link inputowner="1" indexofinput="2" outputowner="0" indexofoutput="1" />
+                                                                <Link inputowner="2" indexofinput="2" outputowner="1" indexofoutput="4" />
+                                                            </Diagram>
                                                         </BehaviorKeyframe>
                                                         <BehaviorKeyframe name="Use" index="76">
-                                                            <Diagram />
+                                                            <Diagram>
+                                                                <Box name="Use" id="1" localization="8" tooltip="" x="126" y="57">
+                                                                    <bitmap>media/images/box/box-python-script.png</bitmap>
+                                                                    <script language="4">
+                                                                        <content>
+                                                                            <![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self)
+
+    def onLoad(self):
+        #put initialization code here
+        self.memory = ALProxy("ALMemory")
+        self.tts = ALProxy("ALAnimatedSpeech")
+
+    def onUnload(self):
+        #put clean-up code here
+        pass
+
+    def onInput_onStart(self):
+        #self.onStopped() #activate the output of the box
+        item_id = self.memory.getData("2048/use_item")
+        item_data = json.loads(self.memory.getData("2048/items"))
+        item = self.get_item_details(item_data, item_id)
+
+        position_index = self.memory.getData("2048/current_position")
+
+        if "use at" not in item or item["use at"] == position_index:
+            # we are in the right place to use item or it can be used anywhere
+            self.tts.say(str(item["use"]))
+            self.use_item(item_id)
+        elif "use wrong" in item:
+            # we are not in the right place to use the item
+            self.tts.say(str(item["use wrong"]))
+        else:
+            # we are also in the wrong place but there is no specific message
+            self.tts.say("I don't see how I could use that here")
+
+        self.onStopped()
+
+    def onInput_onStop(self):
+        self.onUnload() #it is recommended to reuse the clean-up as the box is stopped
+        self.onStopped() #activate the output of the box
+
+    def get_items(self, position_list, current_position):
+        item_list = []
+        if "items" in position_list[current_position]:
+          item_list = [str(i) for i in position_list[current_position]["items"]]
+
+        self.logger.info("Items in current position: "+ str(item_list))
+        return item_list
+
+    def use_item(self, item_id):
+        if item_id == "key":
+            self.use_key()
+
+    def use_key(self):
+        self.logger.info("Executing key operation")
+        position_index = self.memory.getData("2048/current_position")
+        position_data = self.get_position_data(position_index)
+        position_data["moves"].append("south")
+        self.update_position_data(position_index, position_data)
+
+    def get_position_data(self, position_index):
+        level_data = json.loads(self.memory.getData("2048/level"))
+        position_data = level_data[position_index]
+        return position_data
+
+    def update_position_data(self, position_index, position_data):
+        level_data = json.loads(self.memory.getData("2048/level"))
+        level_data[position_index] = position_data
+        self.memory.insertData("2048/level", json.dumps(level_data))
+
+    def get_item_details(self, item_data, item_id):
+        return next((i for i in item_data if i["id"] == item_id), None)]]>
+</content>
+                                                                    </script>
+                                                                    <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
+                                                                    <Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" />
+                                                                    <Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" />
+                                                                    <Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" />
+                                                                </Box>
+                                                                <Box name="Goto (name)" id="2" localization="8" tooltip="Jump to the frame name set in parameters." x="302" y="54">
+                                                                    <bitmap>media/images/box/box-timeLine.png</bitmap>
+                                                                    <script language="4">
+                                                                        <content>
+                                                                            <![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self, False)
+
+    def onInput_onGo(self):
+        self.getParentTimeline().goTo(self.getParameter("Frame name"))]]>
+</content>
+                                                                    </script>
+                                                                    <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
+                                                                    <Input name="onGo" type="1" type_size="1" nature="1" inner="0" tooltip="Parent timeline gotoTimeline when a signal is received on this input." id="2" />
+                                                                    <Parameter name="Frame name" inherits_from_parent="0" content_type="3" value="Get Command" default_value="" custom_choice="0" tooltip="Name of the frame you want to go to." id="3" />
+                                                                </Box>
+                                                                <Link inputowner="1" indexofinput="2" outputowner="0" indexofoutput="1" />
+                                                                <Link inputowner="2" indexofinput="2" outputowner="1" indexofoutput="4" />
+                                                            </Diagram>
                                                         </BehaviorKeyframe>
                                                         <BehaviorKeyframe name="Pick Up" index="92">
-                                                            <Diagram />
+                                                            <Diagram>
+                                                                <Box name="Pick Up" id="1" localization="8" tooltip="" x="136" y="61">
+                                                                    <bitmap>media/images/box/box-python-script.png</bitmap>
+                                                                    <script language="4">
+                                                                        <content>
+                                                                            <![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self)
+
+    def onLoad(self):
+        #put initialization code here
+        self.memory = ALProxy("ALMemory")
+        self.tts = ALProxy("ALAnimatedSpeech")
+
+    def onUnload(self):
+        #put clean-up code here
+        pass
+
+    def onInput_onStart(self):
+        #self.onStopped() #activate the output of the box
+        inventory = self.memory.getData("2048/inventory")
+
+        item_id = self.memory.getData("2048/pick_up_item")
+        item_data = json.loads(self.memory.getData("2048/items"))
+
+        level_data = json.loads(self.memory.getData("2048/level"))
+        position_index = self.memory.getData("2048/current_position")
+        position_data = level_data[position_index]
+
+        item = self.get_item_details(item_data, item_id)
+
+        self.logger.info("Picking up: " + item_id)
+
+        if item and "pickup" in item:
+            if item_id in inventory:
+                self.tts.say("I am already carrying that")
+            else:
+                self.tts.say(str(item["pickup"]))
+                if "can carry" in item and item["can carry"] == True:
+                    inventory.append(item_id)
+                    position_data["items"].remove(item_id)
+                    level_data[position_index] = position_data
+                    self.memory.insertData("2048/current_items", self.get_items(level_data, position_index))
+                    self.logger.info("Remaining items: " + str(position_data["items"]))
+        else:
+            self.tts.say("I can't pick that up")
+
+        self.logger.info("Inventory: " + str(inventory))
+        self.memory.insertData("2048/inventory", inventory)
+        self.memory.insertData("2048/level", json.dumps(level_data))
+        self.onStopped()
+
+    def onInput_onStop(self):
+        self.onUnload() #it is recommended to reuse the clean-up as the box is stopped
+        self.onStopped() #activate the output of the box
+
+    def get_item_details(self, item_data, item_id):
+        return next((i for i in item_data if i["id"] == item_id), None)
+
+    def get_items(self, position_list, current_position):
+        item_list = []
+        if "items" in position_list[current_position]:
+          item_list = [str(i) for i in position_list[current_position]["items"]]
+
+        self.logger.info("Items in current position: "+ str(item_list))
+        return item_list]]>
+</content>
+                                                                    </script>
+                                                                    <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
+                                                                    <Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" />
+                                                                    <Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" />
+                                                                    <Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" />
+                                                                </Box>
+                                                                <Box name="Goto (name)" id="2" localization="8" tooltip="Jump to the frame name set in parameters." x="305" y="55">
+                                                                    <bitmap>media/images/box/box-timeLine.png</bitmap>
+                                                                    <script language="4">
+                                                                        <content>
+                                                                            <![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self, False)
+
+    def onInput_onGo(self):
+        self.getParentTimeline().goTo(self.getParameter("Frame name"))]]>
+</content>
+                                                                    </script>
+                                                                    <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
+                                                                    <Input name="onGo" type="1" type_size="1" nature="1" inner="0" tooltip="Parent timeline gotoTimeline when a signal is received on this input." id="2" />
+                                                                    <Parameter name="Frame name" inherits_from_parent="0" content_type="3" value="Get Command" default_value="" custom_choice="0" tooltip="Name of the frame you want to go to." id="3" />
+                                                                </Box>
+                                                                <Link inputowner="1" indexofinput="2" outputowner="0" indexofoutput="1" />
+                                                                <Link inputowner="2" indexofinput="2" outputowner="1" indexofoutput="4" />
+                                                            </Diagram>
                                                         </BehaviorKeyframe>
                                                         <BehaviorKeyframe name="Drop" index="109">
-                                                            <Diagram />
+                                                            <Diagram>
+                                                                <Box name="Drop" id="1" localization="8" tooltip="" x="107" y="46">
+                                                                    <bitmap>media/images/box/box-python-script.png</bitmap>
+                                                                    <script language="4">
+                                                                        <content>
+                                                                            <![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self)
+
+    def onLoad(self):
+        #put initialization code here
+        self.memory = ALProxy("ALMemory")
+        self.tts = ALProxy("ALAnimatedSpeech")
+
+    def onUnload(self):
+        #put clean-up code here
+        pass
+
+    def onInput_onStart(self):
+        self.logger.info("Dropping")
+        #self.onStopped() #activate the output of the box
+        inventory = self.memory.getData("2048/inventory")
+
+        item_id = self.memory.getData("2048/drop_item")
+        item_data = json.loads(self.memory.getData("2048/items"))
+
+        level_data = json.loads(self.memory.getData("2048/level"))
+        position_index = self.memory.getData("2048/current_position")
+        position_data = level_data[position_index]
+
+        item = self.get_item_details(item_data, item_id)
+
+        self.logger.info("Dropping up: " + item_id)
+
+        if item and "drop" in item and item_id in inventory:
+
+            self.tts.say(str(item["drop"]))
+            inventory.remove(item_id)
+            if "items" not in position_data:
+                position_data["items"] = []
+            position_data["items"].append(item_id)
+            level_data[position_index] = position_data
+            self.memory.insertData("2048/current_items", self.get_items(level_data, position_index))
+            self.logger.info("Remaining items: " + str(position_data["items"]))
+        else:
+            self.tts.say("I don't seem to have that anyway")
+
+        self.logger.info("Inventory: " + str(inventory))
+        self.memory.insertData("2048/inventory", inventory)
+        self.memory.insertData("2048/level", json.dumps(level_data))
+        self.onStopped()
+
+    def onInput_onStop(self):
+        self.onUnload() #it is recommended to reuse the clean-up as the box is stopped
+        self.onStopped() #activate the output of the box
+
+    def get_item_details(self, item_data, item_id):
+        return next((i for i in item_data if i["id"] == item_id), None)
+
+    def get_items(self, position_list, current_position):
+        item_list = []
+        if "items" in position_list[current_position]:
+          item_list = [str(i) for i in position_list[current_position]["items"]]
+
+        self.logger.info("Items in current position: "+ str(item_list))
+        return item_list]]>
+</content>
+                                                                    </script>
+                                                                    <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
+                                                                    <Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" />
+                                                                    <Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" />
+                                                                    <Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" />
+                                                                </Box>
+                                                                <Box name="Goto (name)" id="2" localization="8" tooltip="Jump to the frame name set in parameters." x="295" y="49">
+                                                                    <bitmap>media/images/box/box-timeLine.png</bitmap>
+                                                                    <script language="4">
+                                                                        <content>
+                                                                            <![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self, False)
+
+    def onInput_onGo(self):
+        self.getParentTimeline().goTo(self.getParameter("Frame name"))]]>
+</content>
+                                                                    </script>
+                                                                    <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
+                                                                    <Input name="onGo" type="1" type_size="1" nature="1" inner="0" tooltip="Parent timeline gotoTimeline when a signal is received on this input." id="2" />
+                                                                    <Parameter name="Frame name" inherits_from_parent="0" content_type="3" value="Get Command" default_value="" custom_choice="0" tooltip="Name of the frame you want to go to." id="3" />
+                                                                </Box>
+                                                                <Link inputowner="1" indexofinput="2" outputowner="0" indexofoutput="1" />
+                                                                <Link inputowner="2" indexofinput="2" outputowner="1" indexofoutput="4" />
+                                                            </Diagram>
                                                         </BehaviorKeyframe>
                                                     </BehaviorLayer>
                                                 </Timeline>
                                             </Box>
-                                            <Box name="Load Level" id="2" localization="8" tooltip="" x="151" y="39">
+                                            <Box name="Load Level" id="2" localization="8" tooltip="" x="151" y="53">
                                                 <bitmap>media/images/box/box-python-script.png</bitmap>
                                                 <script language="4">
                                                     <content>
@@ -1636,24 +2310,39 @@ class MyClass(GeneratedClass):
         with open(level_path, "r") as f:
           level_data = json.load(f)
 
+        positions = level_data["level"]
+        current_position = 1
+        self.logger.info(positions[current_position])
+
         self.memory.insertData("2048/level", json.dumps(level_data["level"]))
         self.memory.insertData("2048/items", json.dumps(level_data["items"]))
+        self.memory.insertData("2048/inventory", [])
+        self.memory.insertData("2048/success", str(level_data["success"]))
 
-        self.memory.insertData("2048/current_position", 1)
-
-        self.onStopped()
+        self.memory.insertData("2048/current_position", current_position)
+        self.memory.insertData("2048/current_items", self.get_items(level_data["level"], current_position))
+        self.onNextLevel()
 
     def onInput_onStop(self):
         self.onUnload() #it is recommended to reuse the clean-up as the box is stopped
-        self.onStopped() #activate the output of the box]]>
+        self.onStopped() #activate the output of the box
+
+    def get_items(self, position_list, current_position):
+        item_list = []
+        if "items" in position_list[current_position]:
+          item_list = [str(i) for i in position_list[current_position]["items"]]
+
+        self.logger.info("Items in current position: "+ str(item_list))
+        return item_list]]>
 </content>
                                                 </script>
                                                 <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
                                                 <Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" />
                                                 <Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" />
-                                                <Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" />
+                                                <Output name="onNextLevel" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" />
+                                                <Output name="onFinished" type="1" type_size="1" nature="2" inner="0" tooltip="" id="5" />
                                             </Box>
-                                            <Box name="Goto (name)" id="3" localization="8" tooltip="Jump to the frame name set in parameters." x="573" y="53">
+                                            <Box name="Goto (name)" id="3" localization="8" tooltip="Jump to the frame name set in parameters." x="660" y="26">
                                                 <bitmap>media/images/box/box-timeLine.png</bitmap>
                                                 <script language="4">
                                                     <content>
@@ -1671,7 +2360,8 @@ class MyClass(GeneratedClass):
                                             </Box>
                                             <Link inputowner="2" indexofinput="2" outputowner="0" indexofoutput="1" />
                                             <Link inputowner="1" indexofinput="2" outputowner="2" indexofoutput="4" />
-                                            <Link inputowner="3" indexofinput="2" outputowner="1" indexofoutput="4" />
+                                            <Link inputowner="2" indexofinput="2" outputowner="1" indexofoutput="4" />
+                                            <Link inputowner="3" indexofinput="2" outputowner="2" indexofoutput="5" />
                                         </Diagram>
                                     </BehaviorKeyframe>
                                     <BehaviorKeyframe name="Exit" index="54">

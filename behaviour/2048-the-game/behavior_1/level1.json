@@ -2,12 +2,7 @@
     "level": [
         {
             "description": "you are in square 0",
-            "items": [
-                {
-                    "id": "clock",
-                    "direction": "west"
-                }
-            ],
+            "items": ["clock", "key"],
             "moves": [
                 "east",
                 "south"
@@ -23,12 +18,7 @@
         },
         {
             "description": "you are in square 2",
-            "items": [
-                {
-                    "id": "charger",
-                    "direction": "east"
-                }
-            ],
+            "items": ["charger"],
             "moves": [
                 "west",
                 "south"
@@ -47,7 +37,6 @@
             "moves": [
                 "north",
                 "east",
-                "south",
                 "west"
             ]
         },
@@ -62,23 +51,19 @@
         {
             "description": "you are in square 6",
             "moves": [
-                "north",
-                "east"
+                "north"
             ]
         },
         {
             "description": "you are in square 7",
             "moves": [
-                "north",
-                "east",
-                "west"
+                "north"
             ]
         },
         {
             "description": "you are in square 8",
             "moves": [
-                "north",
-                "west"
+                "north"
             ]
         }
         
@@ -87,32 +72,37 @@
         {
             "id": "clock",
             "description": "a digital clock",
-            "detail": "the clock is frozen, the time shows 12 32 and 19 seconds 2084",
+            "pickup": "I could try to pry it off the wall, but I don't think it will work",
+            "can carry" : false,
+            "examine": "the clock is frozen, the time shows 12 32 and 19 seconds 2084",
             "use": "the time is 12 32 and 19 seconds 2084"
+        },
+        {
+            "id": "key",
+            "description": "an encryption key for level 1",
+            "examine": "a key that provides access to level 1",
+            "pickup": "I have added the encryption key to my key store",
+            "drop" : "I have erased the encryption key from my key store",
+            "can carry" : true,
+            "use at": 4,
+            "use": "It worked! The lift door is opening",
+            "use wrong": "Its a lift key, I need to be near the lift to use it"
         },
         {
             "id": "charger",
             "description": "a robot charger connected to the wall",
-            "detail": "a sticker on the charger says it will recharge 10 power units",
+            "examine": "a sticker on the charger says it will recharge 10 power units",
             "use": "the robots charging port opens"
         },
         {
             "id": "body",
             "description": "a shattered robot corpse is on the floor",
-            "detail": "the robots head has been removed",
-            "use": "you prod the robot but it doesn't move",
-            "items": [
-                "key"
-            ]
-        },
-        {
-            "id": "key",
-            "description": "an encryption key for level 1",
-            "detail": "a key that provides access to level 1",
+            "examine": "the robots head has been removed",
             "use": "you prod the robot but it doesn't move",
             "items": [
                 "key"
             ]
         }
-    ]
+    ],
+    "success":"the lift is moving up to the next floor"
 }
