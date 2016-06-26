@@ -390,7 +390,7 @@ class MyClass(GeneratedClass):
                                     </BehaviorKeyframe>
                                     <BehaviorKeyframe name="Game" index="32">
                                         <Diagram>
-                                            <Box name="Level" id="1" localization="8" tooltip="" x="526" y="182">
+                                            <Box name="Level" id="1" localization="8" tooltip="" x="689" y="175">
                                                 <bitmap>media/images/box/box-timeLine.png</bitmap>
                                                 <script language="4">
                                                     <content>
@@ -1039,7 +1039,7 @@ class MyClass(GeneratedClass):
                                                                     <Output name="moveWest" type="1" type_size="1" nature="1" inner="0" tooltip="" id="8" />
                                                                     <Output name="onReachedGoal" type="1" type_size="1" nature="1" inner="0" tooltip="" id="9" />
                                                                 </Box>
-                                                                <Box name="Goto (name) (1)" id="8" localization="8" tooltip="Jump to the frame name set in parameters." x="767" y="241">
+                                                                <Box name="Goto (name) (1)" id="8" localization="8" tooltip="Jump to the frame name set in parameters." x="1029" y="492">
                                                                     <bitmap>media/images/box/box-timeLine.png</bitmap>
                                                                     <script language="4">
                                                                         <content>
@@ -1103,7 +1103,7 @@ class MyClass(GeneratedClass):
                                                                         <Choice value="Debug" />
                                                                     </Parameter>
                                                                 </Box>
-                                                                <Box name="Goal Reached" id="10" localization="8" tooltip="" x="446" y="685">
+                                                                <Box name="Goal Reached" id="10" localization="8" tooltip="" x="761" y="438">
                                                                     <bitmap>media/images/box/box-python-script.png</bitmap>
                                                                     <script language="4">
                                                                         <content>
@@ -1122,10 +1122,15 @@ class MyClass(GeneratedClass):
 
     def onInput_onStart(self):
         #self.onStopped() #activate the output of the box
+        position_index = self.memory.getData("2048/current_position")
+        goal = self.memory.getData("2048/goal")
         success_message = self.memory.getData("2048/success")
-        self.logger.info("Success message was: "+ str(success_message))
-        self.tts.say(success_message)
-        self.onStopped()
+        if position_index == goal:
+            self.logger.info("Success message was: "+ str(success_message))
+            self.tts.say(str(success_message))
+            self.onStopped()
+        else:
+            self.onContinue()
 
     def onInput_onStop(self):
         self.onUnload() #it is recommended to reuse the clean-up as the box is stopped
@@ -1136,6 +1141,7 @@ class MyClass(GeneratedClass):
                                                                     <Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" />
                                                                     <Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" />
                                                                     <Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" />
+                                                                    <Output name="onContinue" type="1" type_size="1" nature="1" inner="0" tooltip="" id="5" />
                                                                 </Box>
                                                                 <Box name="Move South" id="11" localization="8" tooltip="Move along a trajectory given by an attached .pmt file.&#x0A;&#x0A;V1.0.0&#x0A;" x="482" y="442">
                                                                     <bitmap>media/images/box/movement/walk_forward.png</bitmap>
@@ -1341,20 +1347,250 @@ class MyClass(GeneratedClass):
                                                                     <Output name="failure" type="1" type_size="1" nature="1" inner="0" tooltip="Stimulated if the trajectory was stopped to avoid collisions." id="5" />
                                                                     <Parameter name="Planar Move Trajectory" inherits_from_parent="0" content_type="4" value="/../moves/west.pmt" default_value="" tooltip="" id="6" />
                                                                 </Box>
+                                                                <Box name="Show Image" id="13" localization="8" tooltip="display an image on the screen&#x0A;&#x0A;V1.0.0&#x0A;" x="658" y="641">
+                                                                    <bitmap>media/images/box/interaction/rec_movie.png</bitmap>
+                                                                    <script language="4">
+                                                                        <content>
+                                                                            <![CDATA[
+
+class MyClass(GeneratedClass):
+
+    def onLoad(self):
+        self.frameManager = None
+        try:
+            self.frameManager = ALProxy("ALFrameManager")
+        except Exception as e:
+            self.logger.error(e)
+
+    def onUnload(self):
+        pass
+
+    def _getTabletService(self):
+        tabletService = None
+        try:
+            tabletService = self.session().service("ALTabletService")
+        except Exception as e:
+            self.logger.error(e)
+        return tabletService
+
+    def _getAbsoluteUrl(self, partial_url):
+        import os
+        subPath = os.path.join(self.packageUid(), os.path.normpath(partial_url).lstrip("\\/"))
+        # We create TabletService here in order to avoid
+        # problems with connections and disconnections of the tablet during the life of the application
+        return "http://%s/apps/%s" %(self._getTabletService().robotIp(), subPath.replace(os.path.sep, "/"))
+
+    def onInput_onStart(self):
+        # We create TabletService here in order to avoid
+        # problems with connections and disconnections of the tablet during the life of the application
+        tabletService = self._getTabletService()
+        if tabletService:
+            try:
+                url = self.getParameter("ImageUrl")
+                if url == '':
+                    self.logger.error("URL of the image is empty")
+                if not url.startswith('http'):
+                    url = self._getAbsoluteUrl(url)
+                tabletService.showImage(url)
+            except Exception as err:
+                self.logger.error("Error during ShowImage : %s " % err)
+                self.onStopped()
+        else:
+            self.logger.warning("No ALTabletService, can't display the image.")
+            self.onStopped()
+
+    def onInput_onHideImage(self):
+        # We create TabletService here in order to avoid
+        # problems with connections and disconnections of the tablet during the life of the application
+        tabletService = self._getTabletService()
+        if tabletService:
+            try:
+                tabletService.hideImage()
+            except Exception as err:
+                self.logger.error("Error during HideImage : %s " % err)
+                self.onStopped()
+        else:
+            self.logger.warning("No ALTabletService, can't hide the image.")
+            self.onStopped()
+
+    def onInput_onPreLoadImage(self):
+        # We create TabletService here in order to avoid
+        # problems with connections and disconnections of the tablet during the life of the application
+        tabletService = self._getTabletService()
+        if tabletService:
+            try:
+                partialUrl = self.getParameter("ImageUrl")
+                fullUrl = self._getAbsoluteUrl(partialUrl)
+                tabletService.preLoadImage(fullUrl)
+            except Exception as err:
+                self.logger.warning("Error during preLoadImage : %s " % err)
+                self.onStopped()
+        else:
+            self.logger.warning("No ALTabletService, can't preload the image.")
+            self.onStopped()
+
+    def onInput_onStop(self):
+        self.onUnload()
+        self.onStopped()]]>
+</content>
+                                                                    </script>
+                                                                    <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
+                                                                    <Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" />
+                                                                    <Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" />
+                                                                    <Input name="onHideImage" type="1" type_size="1" nature="1" inner="0" tooltip="Hide the image when a signal is received on this input." id="4" />
+                                                                    <Input name="onPreLoadImage" type="1" type_size="1" nature="1" inner="0" tooltip="Preload the image when a signal is received on this input." id="5" />
+                                                                    <Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="6" />
+                                                                    <Parameter name="ImageUrl" inherits_from_parent="0" content_type="3" value="images/map.jpg" default_value="" custom_choice="0" tooltip='path of the image inside the &quot;html&quot; folder (e.g. &quot;/images/myimage.png&quot;' id="7" />
+                                                                </Box>
+                                                                <Box name="GetMapImage" id="5" localization="8" tooltip="" x="209" y="669">
+                                                                    <bitmap>media/images/box/box-python-script.png</bitmap>
+                                                                    <script language="4">
+                                                                        <content>
+                                                                            <![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self)
+
+    def onLoad(self):
+        self.memory = ALProxy("ALMemory")
+        #put initialization code here
+        self.image_paths = [
+          "images/map0.png"
+          "images/map1.png"
+          "images/map2.png"
+          "images/map3.png"
+          "images/map4.png"
+          "images/map5.png"
+          "images/map6.png"
+          "images/map7.png"
+          "images/map8.png"
+          ]
+
+    def onUnload(self):
+        #put clean-up code here
+        pass
+
+    def onInput_onStart(self):
+        #self.onStopped() #activate the output of the box
+        position_index = self.memory.getData("2048/current_position")
+        self.onStopped(self.image_paths[position_index])
+
+    def onInput_onStop(self):
+        self.onUnload() #it is recommended to reuse the clean-up as the box is stopped
+        self.onStopped() #activate the output of the box]]>
+</content>
+                                                                    </script>
+                                                                    <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
+                                                                    <Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" />
+                                                                    <Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" />
+                                                                    <Output name="onStopped" type="3" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" />
+                                                                </Box>
+                                                                <Box name="Delay" id="14" localization="8" tooltip="Wait a moment before triggering the output. &#x0A;Can be stopped anytime. &#x0A;Multiple inputs will trigger multiple outputs." x="437" y="784">
+                                                                    <bitmap>media/images/box/wait.png</bitmap>
+                                                                    <script language="4">
+                                                                        <content>
+                                                                            <![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self, False)
+
+    def onLoad(self):
+        self.delayed = []
+
+    def onUnload(self):
+        self.cancelDelays()
+
+    def cancelDelays(self):
+        cancel_list = list(self.delayed)
+        for d in cancel_list:
+            d.cancel()
+
+    def cleanDelay(self, fut, fut_ref):
+        self.delayed.remove(fut)
+
+    def triggerOutput(self):
+        self.timerOutput()
+
+    def onInput_onStart(self):
+        import qi
+        import functools
+        delay_future = qi.async(self.triggerOutput, delay=int(self.getParameter("Timeout (s)") * 1000 * 1000))
+        # keep the async operation in an array for cancel
+        # and remove it when it is finished in the callback
+        self.delayed.append(delay_future)
+        bound_clean = functools.partial(self.cleanDelay, delay_future)
+        delay_future.addCallback(bound_clean)
+
+    def onInput_onStop(self):
+        if self.getParameter("Trigger timerOutput if cancelled") and self.delayed:
+            self.timerOutput()
+        self.onUnload()]]>
+</content>
+                                                                    </script>
+                                                                    <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
+                                                                    <Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Start the Delay box with the configured timeout value." id="2" />
+                                                                    <Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Stop the wait and stimulate the output." id="3" />
+                                                                    <Output name="timerOutput" type="1" type_size="1" nature="1" inner="0" tooltip="Send a bang once delay set in parameters is elapsed, or if the box is stopped and the appropriate parameter is set." id="4" />
+                                                                    <Parameter name="Timeout (s)" inherits_from_parent="0" content_type="2" value="0.5" default_value="1" min="0" max="5000" tooltip="Duration the box waits before stimulating the output." id="5" />
+                                                                    <Parameter name="Trigger timerOutput if cancelled" inherits_from_parent="0" content_type="0" value="0" default_value="1" tooltip="If the box is currently delaying at least one signal and cancelled, output will be stimulated." id="6" />
+                                                                </Box>
+                                                                <Box name="Wait For Signals" id="7" localization="8" tooltip="Wait for both inputs to be stimulated before stimulating its output." x="835" y="617">
+                                                                    <bitmap>media/images/box/wait.png</bitmap>
+                                                                    <script language="4">
+                                                                        <content>
+                                                                            <![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self, False)
+
+    def onLoad(self):
+        self.ok = [False]*2
+
+    def onUnload(self):
+        #puts code for box cleanup here
+        ""
+
+    def onStart(self, nInput):
+        self.ok[nInput-1] = True
+        bOutput = True
+        for bOk in self.ok:
+            bOutput = bOutput and bOk
+        if( bOutput ):
+            self.ok = [False]*2
+            self.signalsReceived()
+
+    def onInput_signal1(self):
+        self.onStart(1)
+
+    def onInput_signal2(self):
+        self.onStart(2)]]>
+</content>
+                                                                    </script>
+                                                                    <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when Diagram is loaded." id="1" />
+                                                                    <Input name="signal1" type="1" type_size="1" nature="1" inner="0" tooltip="First signal to wait." id="2" />
+                                                                    <Input name="signal2" type="1" type_size="1" nature="1" inner="0" tooltip="Second signal to wait." id="3" />
+                                                                    <Output name="signalsReceived" type="1" type_size="1" nature="2" inner="0" tooltip="Signal sent when both inputs have been stimulated." id="4" />
+                                                                </Box>
                                                                 <Link inputowner="2" indexofinput="2" outputowner="1" indexofoutput="4" />
                                                                 <Link inputowner="1" indexofinput="2" outputowner="4" indexofoutput="4" />
                                                                 <Link inputowner="9" indexofinput="2" outputowner="4" indexofoutput="4" />
-                                                                <Link inputowner="10" indexofinput="2" outputowner="4" indexofoutput="9" />
                                                                 <Link inputowner="0" indexofinput="4" outputowner="10" indexofoutput="4" />
                                                                 <Link inputowner="4" indexofinput="2" outputowner="0" indexofoutput="1" />
                                                                 <Link inputowner="11" indexofinput="2" outputowner="4" indexofoutput="7" />
-                                                                <Link inputowner="8" indexofinput="2" outputowner="11" indexofoutput="4" />
                                                                 <Link inputowner="6" indexofinput="2" outputowner="4" indexofoutput="5" />
-                                                                <Link inputowner="8" indexofinput="2" outputowner="6" indexofoutput="4" />
                                                                 <Link inputowner="12" indexofinput="2" outputowner="4" indexofoutput="8" />
-                                                                <Link inputowner="8" indexofinput="2" outputowner="12" indexofoutput="4" />
-                                                                <Link inputowner="8" indexofinput="2" outputowner="3" indexofoutput="4" />
                                                                 <Link inputowner="3" indexofinput="2" outputowner="4" indexofoutput="6" />
+                                                                <Link inputowner="10" indexofinput="2" outputowner="6" indexofoutput="4" />
+                                                                <Link inputowner="10" indexofinput="2" outputowner="3" indexofoutput="4" />
+                                                                <Link inputowner="10" indexofinput="2" outputowner="11" indexofoutput="4" />
+                                                                <Link inputowner="10" indexofinput="2" outputowner="12" indexofoutput="4" />
+                                                                <Link inputowner="13" indexofinput="7" outputowner="5" indexofoutput="4" />
+                                                                <Link inputowner="14" indexofinput="2" outputowner="5" indexofoutput="4" />
+                                                                <Link inputowner="13" indexofinput="2" outputowner="14" indexofoutput="4" />
+                                                                <Link inputowner="5" indexofinput="2" outputowner="4" indexofoutput="8" />
+                                                                <Link inputowner="5" indexofinput="2" outputowner="4" indexofoutput="7" />
+                                                                <Link inputowner="5" indexofinput="2" outputowner="4" indexofoutput="6" />
+                                                                <Link inputowner="5" indexofinput="2" outputowner="4" indexofoutput="5" />
+                                                                <Link inputowner="7" indexofinput="3" outputowner="13" indexofoutput="6" />
+                                                                <Link inputowner="7" indexofinput="2" outputowner="10" indexofoutput="5" />
+                                                                <Link inputowner="8" indexofinput="2" outputowner="7" indexofoutput="4" />
                                                             </Diagram>
                                                         </BehaviorKeyframe>
                                                         <BehaviorKeyframe name="Examine" index="59">
@@ -1864,10 +2100,239 @@ class MyClass(GeneratedClass):
                                                 <Input name="onGo" type="1" type_size="1" nature="1" inner="0" tooltip="Parent timeline gotoTimeline when a signal is received on this input." id="2" />
                                                 <Parameter name="Frame name" inherits_from_parent="0" content_type="3" value="Exit" default_value="" custom_choice="0" tooltip="Name of the frame you want to go to." id="3" />
                                             </Box>
-                                            <Link inputowner="1" indexofinput="2" outputowner="2" indexofoutput="4" />
+                                            <Box name="Show Image" id="13" localization="8" tooltip="display an image on the screen&#x0A;&#x0A;V1.0.0&#x0A;" x="416" y="265">
+                                                <bitmap>media/images/box/interaction/rec_movie.png</bitmap>
+                                                <script language="4">
+                                                    <content>
+                                                        <![CDATA[
+
+class MyClass(GeneratedClass):
+
+    def onLoad(self):
+        self.frameManager = None
+        try:
+            self.frameManager = ALProxy("ALFrameManager")
+        except Exception as e:
+            self.logger.error(e)
+
+    def onUnload(self):
+        pass
+
+    def _getTabletService(self):
+        tabletService = None
+        try:
+            tabletService = self.session().service("ALTabletService")
+        except Exception as e:
+            self.logger.error(e)
+        return tabletService
+
+    def _getAbsoluteUrl(self, partial_url):
+        import os
+        subPath = os.path.join(self.packageUid(), os.path.normpath(partial_url).lstrip("\\/"))
+        # We create TabletService here in order to avoid
+        # problems with connections and disconnections of the tablet during the life of the application
+        return "http://%s/apps/%s" %(self._getTabletService().robotIp(), subPath.replace(os.path.sep, "/"))
+
+    def onInput_onStart(self):
+        # We create TabletService here in order to avoid
+        # problems with connections and disconnections of the tablet during the life of the application
+        tabletService = self._getTabletService()
+        if tabletService:
+            try:
+                url = self.getParameter("ImageUrl")
+                if url == '':
+                    self.logger.error("URL of the image is empty")
+                if not url.startswith('http'):
+                    url = self._getAbsoluteUrl(url)
+                tabletService.showImage(url)
+            except Exception as err:
+                self.logger.error("Error during ShowImage : %s " % err)
+                self.onStopped()
+        else:
+            self.logger.warning("No ALTabletService, can't display the image.")
+            self.onStopped()
+
+    def onInput_onHideImage(self):
+        # We create TabletService here in order to avoid
+        # problems with connections and disconnections of the tablet during the life of the application
+        tabletService = self._getTabletService()
+        if tabletService:
+            try:
+                tabletService.hideImage()
+            except Exception as err:
+                self.logger.error("Error during HideImage : %s " % err)
+                self.onStopped()
+        else:
+            self.logger.warning("No ALTabletService, can't hide the image.")
+            self.onStopped()
+
+    def onInput_onPreLoadImage(self):
+        # We create TabletService here in order to avoid
+        # problems with connections and disconnections of the tablet during the life of the application
+        tabletService = self._getTabletService()
+        if tabletService:
+            try:
+                partialUrl = self.getParameter("ImageUrl")
+                fullUrl = self._getAbsoluteUrl(partialUrl)
+                tabletService.preLoadImage(fullUrl)
+            except Exception as err:
+                self.logger.warning("Error during preLoadImage : %s " % err)
+                self.onStopped()
+        else:
+            self.logger.warning("No ALTabletService, can't preload the image.")
+            self.onStopped()
+
+    def onInput_onStop(self):
+        self.onUnload()
+        self.onStopped()]]>
+</content>
+                                                </script>
+                                                <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
+                                                <Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" />
+                                                <Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" />
+                                                <Input name="onHideImage" type="1" type_size="1" nature="1" inner="0" tooltip="Hide the image when a signal is received on this input." id="4" />
+                                                <Input name="onPreLoadImage" type="1" type_size="1" nature="1" inner="0" tooltip="Preload the image when a signal is received on this input." id="5" />
+                                                <Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="6" />
+                                                <Parameter name="ImageUrl" inherits_from_parent="0" content_type="3" value="images/map.jpg" default_value="" custom_choice="0" tooltip='path of the image inside the &quot;html&quot; folder (e.g. &quot;/images/myimage.png&quot;' id="7" />
+                                            </Box>
+                                            <Box name="GetMapImage" id="4" localization="8" tooltip="" x="193" y="259">
+                                                <bitmap>media/images/box/box-python-script.png</bitmap>
+                                                <script language="4">
+                                                    <content>
+                                                        <![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self)
+
+    def onLoad(self):
+        self.memory = ALProxy("ALMemory")
+        #put initialization code here
+        self.image_paths = [
+          "images/map0.png",
+          "images/map1.png",
+          "images/map2.png",
+          "images/map3.png",
+          "images/map4.png",
+          "images/map5.png",
+          "images/map6.png",
+          "images/map7.png",
+          "images/map8.png"
+          ]
+
+    def onUnload(self):
+        #put clean-up code here
+        pass
+
+    def onInput_onStart(self):
+        #self.onStopped() #activate the output of the box
+        position_index = self.memory.getData("2048/current_position")
+        self.logger.info(position_index)
+        self.onStopped(self.image_paths[position_index])
+
+    def onInput_onStop(self):
+        self.onUnload() #it is recommended to reuse the clean-up as the box is stopped
+        self.onStopped() #activate the output of the box]]>
+</content>
+                                                </script>
+                                                <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
+                                                <Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" />
+                                                <Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" />
+                                                <Output name="onStopped" type="3" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" />
+                                            </Box>
+                                            <Box name="Delay" id="14" localization="8" tooltip="Wait a moment before triggering the output. &#x0A;Can be stopped anytime. &#x0A;Multiple inputs will trigger multiple outputs." x="286" y="349">
+                                                <bitmap>media/images/box/wait.png</bitmap>
+                                                <script language="4">
+                                                    <content>
+                                                        <![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self, False)
+
+    def onLoad(self):
+        self.delayed = []
+
+    def onUnload(self):
+        self.cancelDelays()
+
+    def cancelDelays(self):
+        cancel_list = list(self.delayed)
+        for d in cancel_list:
+            d.cancel()
+
+    def cleanDelay(self, fut, fut_ref):
+        self.delayed.remove(fut)
+
+    def triggerOutput(self):
+        self.timerOutput()
+
+    def onInput_onStart(self):
+        import qi
+        import functools
+        delay_future = qi.async(self.triggerOutput, delay=int(self.getParameter("Timeout (s)") * 1000 * 1000))
+        # keep the async operation in an array for cancel
+        # and remove it when it is finished in the callback
+        self.delayed.append(delay_future)
+        bound_clean = functools.partial(self.cleanDelay, delay_future)
+        delay_future.addCallback(bound_clean)
+
+    def onInput_onStop(self):
+        if self.getParameter("Trigger timerOutput if cancelled") and self.delayed:
+            self.timerOutput()
+        self.onUnload()]]>
+</content>
+                                                </script>
+                                                <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
+                                                <Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Start the Delay box with the configured timeout value." id="2" />
+                                                <Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Stop the wait and stimulate the output." id="3" />
+                                                <Output name="timerOutput" type="1" type_size="1" nature="1" inner="0" tooltip="Send a bang once delay set in parameters is elapsed, or if the box is stopped and the appropriate parameter is set." id="4" />
+                                                <Parameter name="Timeout (s)" inherits_from_parent="0" content_type="2" value="0.5" default_value="1" min="0" max="5000" tooltip="Duration the box waits before stimulating the output." id="5" />
+                                                <Parameter name="Trigger timerOutput if cancelled" inherits_from_parent="0" content_type="0" value="0" default_value="1" tooltip="If the box is currently delaying at least one signal and cancelled, output will be stimulated." id="6" />
+                                            </Box>
+                                            <Box name="Wait For Signals" id="5" localization="8" tooltip="Wait for both inputs to be stimulated before stimulating its output." x="528" y="226">
+                                                <bitmap>media/images/box/wait.png</bitmap>
+                                                <script language="4">
+                                                    <content>
+                                                        <![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self, False)
+
+    def onLoad(self):
+        self.ok = [False]*2
+
+    def onUnload(self):
+        #puts code for box cleanup here
+        ""
+
+    def onStart(self, nInput):
+        self.ok[nInput-1] = True
+        bOutput = True
+        for bOk in self.ok:
+            bOutput = bOutput and bOk
+        if( bOutput ):
+            self.ok = [False]*2
+            self.signalsReceived()
+
+    def onInput_signal1(self):
+        self.onStart(1)
+
+    def onInput_signal2(self):
+        self.onStart(2)]]>
+</content>
+                                                </script>
+                                                <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when Diagram is loaded." id="1" />
+                                                <Input name="signal1" type="1" type_size="1" nature="1" inner="0" tooltip="First signal to wait." id="2" />
+                                                <Input name="signal2" type="1" type_size="1" nature="1" inner="0" tooltip="Second signal to wait." id="3" />
+                                                <Output name="signalsReceived" type="1" type_size="1" nature="2" inner="0" tooltip="Signal sent when both inputs have been stimulated." id="4" />
+                                            </Box>
                                             <Link inputowner="3" indexofinput="2" outputowner="2" indexofoutput="5" />
                                             <Link inputowner="2" indexofinput="3" outputowner="1" indexofoutput="4" />
                                             <Link inputowner="2" indexofinput="2" outputowner="0" indexofoutput="1" />
+                                            <Link inputowner="13" indexofinput="7" outputowner="4" indexofoutput="4" />
+                                            <Link inputowner="14" indexofinput="2" outputowner="4" indexofoutput="4" />
+                                            <Link inputowner="13" indexofinput="2" outputowner="14" indexofoutput="4" />
+                                            <Link inputowner="4" indexofinput="2" outputowner="2" indexofoutput="4" />
+                                            <Link inputowner="4" indexofinput="2" outputowner="2" indexofoutput="5" />
+                                            <Link inputowner="5" indexofinput="2" outputowner="2" indexofoutput="4" />
+                                            <Link inputowner="5" indexofinput="3" outputowner="13" indexofoutput="6" />
+                                            <Link inputowner="1" indexofinput="2" outputowner="5" indexofoutput="4" />
                                         </Diagram>
                                     </BehaviorKeyframe>
                                     <BehaviorKeyframe name="Exit" index="54">
@@ -2045,104 +2510,8 @@ class MyClass(GeneratedClass):
                                 </BehaviorLayer>
                             </Timeline>
                         </Box>
-                        <Box name="Show Image" id="13" localization="8" tooltip="display an image on the screen&#x0A;&#x0A;V1.0.0&#x0A;" x="211" y="180">
-                            <bitmap>media/images/box/interaction/rec_movie.png</bitmap>
-                            <script language="4">
-                                <content>
-                                    <![CDATA[
-
-class MyClass(GeneratedClass):
-
-    def onLoad(self):
-        self.frameManager = None
-        try:
-            self.frameManager = ALProxy("ALFrameManager")
-        except Exception as e:
-            self.logger.error(e)
-
-    def onUnload(self):
-        pass
-
-    def _getTabletService(self):
-        tabletService = None
-        try:
-            tabletService = self.session().service("ALTabletService")
-        except Exception as e:
-            self.logger.error(e)
-        return tabletService
-
-    def _getAbsoluteUrl(self, partial_url):
-        import os
-        subPath = os.path.join(self.packageUid(), os.path.normpath(partial_url).lstrip("\\/"))
-        # We create TabletService here in order to avoid
-        # problems with connections and disconnections of the tablet during the life of the application
-        return "http://%s/apps/%s" %(self._getTabletService().robotIp(), subPath.replace(os.path.sep, "/"))
-
-    def onInput_onStart(self):
-        # We create TabletService here in order to avoid
-        # problems with connections and disconnections of the tablet during the life of the application
-        tabletService = self._getTabletService()
-        if tabletService:
-            try:
-                url = self.getParameter("ImageUrl")
-                if url == '':
-                    self.logger.error("URL of the image is empty")
-                if not url.startswith('http'):
-                    url = self._getAbsoluteUrl(url)
-                tabletService.showImage(url)
-            except Exception as err:
-                self.logger.error("Error during ShowImage : %s " % err)
-                self.onStopped()
-        else:
-            self.logger.warning("No ALTabletService, can't display the image.")
-            self.onStopped()
-
-    def onInput_onHideImage(self):
-        # We create TabletService here in order to avoid
-        # problems with connections and disconnections of the tablet during the life of the application
-        tabletService = self._getTabletService()
-        if tabletService:
-            try:
-                tabletService.hideImage()
-            except Exception as err:
-                self.logger.error("Error during HideImage : %s " % err)
-                self.onStopped()
-        else:
-            self.logger.warning("No ALTabletService, can't hide the image.")
-            self.onStopped()
-
-    def onInput_onPreLoadImage(self):
-        # We create TabletService here in order to avoid
-        # problems with connections and disconnections of the tablet during the life of the application
-        tabletService = self._getTabletService()
-        if tabletService:
-            try:
-                partialUrl = self.getParameter("ImageUrl")
-                fullUrl = self._getAbsoluteUrl(partialUrl)
-                tabletService.preLoadImage(fullUrl)
-            except Exception as err:
-                self.logger.warning("Error during preLoadImage : %s " % err)
-                self.onStopped()
-        else:
-            self.logger.warning("No ALTabletService, can't preload the image.")
-            self.onStopped()
-
-    def onInput_onStop(self):
-        self.onUnload()
-        self.onStopped()]]>
-</content>
-                            </script>
-                            <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
-                            <Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" />
-                            <Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" />
-                            <Input name="onHideImage" type="1" type_size="1" nature="1" inner="0" tooltip="Hide the image when a signal is received on this input." id="4" />
-                            <Input name="onPreLoadImage" type="1" type_size="1" nature="1" inner="0" tooltip="Preload the image when a signal is received on this input." id="5" />
-                            <Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="6" />
-                            <Parameter name="ImageUrl" inherits_from_parent="0" content_type="3" value="images/map.jpg" default_value="" custom_choice="0" tooltip='path of the image inside the &quot;html&quot; folder (e.g. &quot;/images/myimage.png&quot;' id="7" />
-                        </Box>
                         <Link inputowner="1" indexofinput="2" outputowner="0" indexofoutput="2" />
                         <Link inputowner="0" indexofinput="4" outputowner="1" indexofoutput="4" />
-                        <Link inputowner="13" indexofinput="2" outputowner="0" indexofoutput="2" />
                     </Diagram>
                 </BehaviorKeyframe>
             </BehaviorLayer>
