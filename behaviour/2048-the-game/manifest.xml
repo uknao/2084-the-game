@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<package version="0.0.0" uuid="2048-the-game-688199">
+<package uuid="2048-the-game-688199" version="0.0.0">
  <names>
   <name lang="en_US">2048-the-game</name>
   <name lang="en_US-x-scrald">2048-the-game</name>

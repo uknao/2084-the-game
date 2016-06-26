@@ -1961,7 +1961,8 @@ class MyClass(GeneratedClass):
     def onInput_onStart(self):
         #self.onStopped() #activate the output of the box
         success_message = self.memory.getData("2048/success")
-        self.tts.say(success_message)
+        self.logger.info("Success message was: "+ str(success_message))
+        self.tts.say(str(success_message))
         self.onStopped()
 
     def onInput_onStop(self):
@@ -2047,7 +2048,7 @@ class MyClass(GeneratedClass):
                 position_data["items"] = []
             position_data["items"] = position_data["items"] + item["items"]
 
-        self.logger.info("Updated Items: " + str(item["items"]))
+            self.logger.info("Updated Items: " + str(item["items"]))
         level_data[position_index] = position_data
         self.memory.insertData("2048/level", json.dumps(level_data))
         self.memory.insertData("2048/current_items", self.get_items(level_data, position_index))
@@ -2455,6 +2456,7 @@ class MyClass(GeneratedClass):
         self.memory.insertData("2048/current_position", level_info["start"])
         self.memory.insertData("2048/current_items", self.get_items(level_state[level_index], current_position))
         self.memory.insertData("2048/goal", level_info["goal"])
+        self.memory.insertData("2048/success", level_info["success"])
 
 
 
