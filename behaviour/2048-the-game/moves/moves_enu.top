@@ -7,6 +7,7 @@ concept:(south) ["move south" "go south"]
 concept:(east) ["move east" "go east"]
 concept:(west) ["move west" "go west"]
 concept:(look) ["look" "look around" "where am I?"]
+concept:(take) ["pick up" "take"]
 dynamic:2084items
 # Catching inputs and triggering outputs
 #u:(e:onStart) $onStopped=1
@@ -21,6 +22,6 @@ u:(use _~2084items) $2048/use_item=$1 $onUse=1
 
 u:(examine _~2084items) $2048/examine_item=$1 $onExamine=1
 
-u:(pick up _~2084items) $2048/pick_up_item=$1 $onPickUp=1
+u:(take _~2084items) $2048/pick_up_item=$1 $onPickUp=1
 
 u:(drop _~2084items) $2048/drop_item=$1 $onDrop=1

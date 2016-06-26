@@ -1,8 +1,11 @@
 {
+    "start": 7,
+    "return": 7,
+    "goal":5,
     "level": [
         {
             "description": "you are in square 0",
-            "items": ["clock", "key"],
+            "items": [],
             "moves": [
                 "east",
                 "south"
@@ -18,7 +21,7 @@
         },
         {
             "description": "you are in square 2",
-            "items": ["charger"],
+            "items": [],
             "moves": [
                 "west",
                 "south"

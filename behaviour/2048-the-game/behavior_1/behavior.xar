@@ -282,7 +282,7 @@ class MyClass(GeneratedClass):
 			"Danish" : " Hej ",
 			"German" : " Hallo ",
 			"Greek" : "  ",
-			"English" : " Hello, get to the top of the building ",
+			"English" : " Welcome to 20 84 ",
 			"Spanish" : " Hola ",
 			"Finnish" : " Hei ",
 			"French" : " Bonjour ",
@@ -322,7 +322,7 @@ class MyClass(GeneratedClass):
                                                                             <![CDATA[]]>
 </greek>
                                                                         <english>
-                                                                            <![CDATA[Hello, get to the top of the building]]>
+                                                                            <![CDATA[Welcome to 20 84]]>
 </english>
                                                                         <spanish>
                                                                             <![CDATA[Hola]]>
@@ -369,7 +369,7 @@ class MyClass(GeneratedClass):
                                                                         <chinese>
                                                                             <![CDATA[你好]]>
 </chinese>
-                                                                        <language>6</language>
+                                                                        <language>5</language>
                                                                     </pluginContent>
                                                                     <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
                                                                     <Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Data is sent on the output when this input is stimulated." id="2" />
@@ -390,7 +390,7 @@ class MyClass(GeneratedClass):
                                     </BehaviorKeyframe>
                                     <BehaviorKeyframe name="Game" index="32">
                                         <Diagram>
-                                            <Box name="Level" id="1" localization="8" tooltip="" x="362" y="142">
+                                            <Box name="Level" id="1" localization="8" tooltip="" x="526" y="182">
                                                 <bitmap>media/images/box/box-timeLine.png</bitmap>
                                                 <script language="4">
                                                     <content>
@@ -461,20 +461,46 @@ class MyClass(GeneratedClass):
         position_index = self.memory.getData("2048/current_position")
         position_data = level_data[position_index]
         inventory = self.memory.getData("2048/inventory")
+        item_data = json.loads(self.memory.getData("2048/items"))
 
         current_items = self.memory.getData("2048/current_items")
 
         self.logger.info("Postion: " + str(position_index))
         self.logger.info("Items: " + str(current_items))
+        self.logger.info(str(position_data))
+
+
         self.logger.info("Inventory: " + str(inventory))
 
-        self.tts.say(str(position_data["description"]))
+        if "visited" not in position_data or position_data["visited"] == False:
+            self.tts.say(str(position_data["description"]))
+        else:
+            self.tts.say(str(position_data["shortdesc"]))
+
+        movable_items = []
+        for i in current_items:
+            item_details = self.get_item_details(item_data, i)
+            if "can carry" in item_details and item_details["can carry"] == True:
+                movable_items.append(item_details)
+
+        if len(movable_items) > 0:
+            descriptions = [str(i["description"]) for i in movable_items]
+            item_text = "there is " + ", there is ".join(descriptions)
+            self.logger.info(item_text)
+            self.tts.say(item_text)
+
+        position_data["visited"] = True
+        level_data[position_index] = position_data
+        self.memory.insertData("2048/level", json.dumps(level_data))
         self.onStopped()
 
 
     def onInput_onStop(self):
         self.onUnload() #it is recommended to reuse the clean-up as the box is stopped
-        self.onStopped() #activate the output of the box]]>
+        self.onStopped() #activate the output of the box
+
+    def get_item_details(self, item_data, item_id):
+        return next((i for i in item_data if i["id"] == item_id), None)]]>
 </content>
                                                                     </script>
                                                                     <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
@@ -488,7 +514,7 @@ class MyClass(GeneratedClass):
                                                             </Diagram>
                                                         </BehaviorKeyframe>
                                                         <BehaviorKeyframe name="Get Command" index="23">
-                                                            <Diagram>
+                                                            <Diagram scale="200">
                                                                 <Box name="Goto (name)" id="1" localization="8" tooltip="Jump to the frame name set in parameters." x="374" y="17">
                                                                     <bitmap>media/images/box/box-timeLine.png</bitmap>
                                                                     <script language="4">
@@ -505,7 +531,7 @@ class MyClass(GeneratedClass):
                                                                     <Input name="onGo" type="1" type_size="1" nature="1" inner="0" tooltip="Parent timeline gotoTimeline when a signal is received on this input." id="2" />
                                                                     <Parameter name="Frame name" inherits_from_parent="0" content_type="3" value="Move" default_value="" custom_choice="0" tooltip="Name of the frame you want to go to." id="3" />
                                                                 </Box>
-                                                                <Box name="Goto (name) (1)" id="2" localization="8" tooltip="Jump to the frame name set in parameters." x="375" y="119">
+                                                                <Box name="Goto (name) (1)" id="2" localization="8" tooltip="Jump to the frame name set in parameters." x="585" y="116">
                                                                     <bitmap>media/images/box/box-timeLine.png</bitmap>
                                                                     <script language="4">
                                                                         <content>
@@ -650,14 +676,50 @@ class MyClass(GeneratedClass):
                                                                     <Input name="onGo" type="1" type_size="1" nature="1" inner="0" tooltip="Parent timeline gotoTimeline when a signal is received on this input." id="2" />
                                                                     <Parameter name="Frame name" inherits_from_parent="0" content_type="3" value="Drop" default_value="" custom_choice="0" tooltip="Name of the frame you want to go to." id="3" />
                                                                 </Box>
+                                                                <Box name="Reset look detail" id="9" localization="8" tooltip="" x="384" y="118">
+                                                                    <bitmap>media/images/box/box-python-script.png</bitmap>
+                                                                    <script language="4">
+                                                                        <content>
+                                                                            <![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self)
+
+    def onLoad(self):
+        self.memory = ALProxy("ALMemory")
+
+    def onUnload(self):
+        #put clean-up code here
+        pass
+
+    def onInput_onStart(self):
+        #self.onStopped() #activate the output of the box
+        level_data = json.loads(self.memory.getData("2048/level"))
+        position_index = self.memory.getData("2048/current_position")
+        #position_data = level_data[position_index]
+
+        del(level_data[position_index]["visited"])
+        self.memory.insertData("2048/level", json.dumps(level_data))
+        self.onStopped()
+
+    def onInput_onStop(self):
+        self.onUnload() #it is recommended to reuse the clean-up as the box is stopped
+        self.onStopped() #activate the output of the box]]>
+</content>
+                                                                    </script>
+                                                                    <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
+                                                                    <Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" />
+                                                                    <Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" />
+                                                                    <Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" />
+                                                                </Box>
                                                                 <Link inputowner="3" indexofinput="2" outputowner="0" indexofoutput="1" />
                                                                 <Link inputowner="4" indexofinput="2" outputowner="3" indexofoutput="4" />
                                                                 <Link inputowner="1" indexofinput="2" outputowner="4" indexofoutput="4" />
-                                                                <Link inputowner="2" indexofinput="2" outputowner="4" indexofoutput="5" />
                                                                 <Link inputowner="5" indexofinput="2" outputowner="4" indexofoutput="6" />
                                                                 <Link inputowner="6" indexofinput="2" outputowner="4" indexofoutput="7" />
                                                                 <Link inputowner="7" indexofinput="2" outputowner="4" indexofoutput="8" />
                                                                 <Link inputowner="8" indexofinput="2" outputowner="4" indexofoutput="9" />
+                                                                <Link inputowner="9" indexofinput="2" outputowner="4" indexofoutput="5" />
+                                                                <Link inputowner="2" indexofinput="2" outputowner="9" indexofoutput="4" />
                                                             </Diagram>
                                                         </BehaviorKeyframe>
                                                         <BehaviorKeyframe name="Move" index="45">
@@ -912,6 +974,7 @@ class MyClass(GeneratedClass):
 
         level_data = json.loads(self.memory.getData("2048/level"))
         position_index = self.memory.getData("2048/current_position")
+        goal = self.memory.getData("2048/goal")
         position_data = level_data[position_index]
         moves = position_data["moves"]
 
@@ -927,7 +990,9 @@ class MyClass(GeneratedClass):
         self.memory.insertData("2048/current_position", new_position)
         self.memory.insertData("2048/current_items", self.get_items(level_data, new_position))
 
-        if move == "north":
+        if new_position == goal:
+            self.onReachedGoal()
+        elif move == "north":
             self.moveNorth()
         elif move == "east":
             self.moveEast()
@@ -1897,6 +1962,7 @@ class MyClass(GeneratedClass):
         #self.onStopped() #activate the output of the box
         success_message = self.memory.getData("2048/success")
         self.tts.say(success_message)
+        self.onStopped()
 
     def onInput_onStop(self):
         self.onUnload() #it is recommended to reuse the clean-up as the box is stopped
@@ -1955,6 +2021,7 @@ class MyClass(GeneratedClass):
 
         if item:
             self.tts.say(str(item["examine"]))
+            self.examine_item(item_id)
         else:
             self.tts.say("I don't know what that is")
         self.onStopped()
@@ -1964,7 +2031,35 @@ class MyClass(GeneratedClass):
         self.onStopped() #activate the output of the box
 
     def get_item_details(self, item_data, item_id):
-        return next((i for i in item_data if i["id"] == item_id), None)]]>
+        return next((i for i in item_data if i["id"] == item_id), None)
+
+    def examine_item(self, item_id):
+        item_data = json.loads(self.memory.getData("2048/items"))
+        level_data = json.loads(self.memory.getData("2048/level"))
+        item = self.get_item_details(item_data, item_id)
+        position_index = self.memory.getData("2048/current_position")
+        position_data = level_data[position_index]
+
+
+        if "items" in item and len(item["items"]) > 0:
+            self.logger.info("New Items: " + str(item["items"]))
+            if "items" not in position_data:
+                position_data["items"] = []
+            position_data["items"] = position_data["items"] + item["items"]
+
+        self.logger.info("Updated Items: " + str(item["items"]))
+        level_data[position_index] = position_data
+        self.memory.insertData("2048/level", json.dumps(level_data))
+        self.memory.insertData("2048/current_items", self.get_items(level_data, position_index))
+
+
+    def get_items(self, position_list, current_position):
+        item_list = []
+        if "items" in position_list[current_position]:
+          item_list = [str(i) for i in position_list[current_position]["items"]]
+
+        self.logger.info("Items in current position: "+ str(item_list))
+        return item_list]]>
 </content>
                                                                     </script>
                                                                     <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
@@ -2285,7 +2380,7 @@ class MyClass(GeneratedClass):
                                                     </BehaviorLayer>
                                                 </Timeline>
                                             </Box>
-                                            <Box name="Load Level" id="2" localization="8" tooltip="" x="151" y="53">
+                                            <Box name="Load Level" id="2" localization="8" tooltip="" x="315" y="93">
                                                 <bitmap>media/images/box/box-python-script.png</bitmap>
                                                 <script language="4">
                                                     <content>
@@ -2299,28 +2394,71 @@ class MyClass(GeneratedClass):
         #put initialization code here
         self.memory = ALProxy("ALMemory")
 
+        self.level_files = ["level0.json", "level1.json"]
+
     def onUnload(self):
         #put clean-up code here
         pass
 
     def onInput_onStart(self):
-        #self.onStopped() #activate the output of the box
-        level_path = os.path.join(self.behaviorAbsolutePath(), "level1.json")
-        level_data = []
-        with open(level_path, "r") as f:
-          level_data = json.load(f)
-
-        positions = level_data["level"]
-        current_position = 1
-        self.logger.info(positions[current_position])
-
-        self.memory.insertData("2048/level", json.dumps(level_data["level"]))
-        self.memory.insertData("2048/items", json.dumps(level_data["items"]))
+        self.memory.insertData("2048/current_level", 0)
         self.memory.insertData("2048/inventory", [])
-        self.memory.insertData("2048/success", str(level_data["success"]))
+        self.load_level(0, [None] * len(self.level_files), [None] * len(self.level_files))
 
-        self.memory.insertData("2048/current_position", current_position)
-        self.memory.insertData("2048/current_items", self.get_items(level_data["level"], current_position))
+    def onInput_nextLevel(self):
+
+        level_index = self.memory.getData("2048/current_level")
+
+        level_data = json.loads(self.memory.getData("2048/level"))
+        item_data = json.loads(self.memory.getData("2048/items"))
+
+        # save the current level state
+        level_state = self.memory.getData("2048/level_state")
+        item_state = self.memory.getData("2048/item_state")
+
+        level_state[level_index] = level_data
+        item_state[level_index] = item_data
+
+        level_index += 1
+
+        if level_index >= len(self.level_files):
+            self.onFinished()
+            return
+        else:
+            self.load_level(level_index, level_state, item_state)
+
+
+
+
+    def load_level(self, level_index, level_state, item_state):
+        level_path = os.path.join(self.behaviorAbsolutePath(), self.level_files[level_index])
+        level_info = []
+        with open(level_path, "r") as f:
+              level_info = json.load(f)
+
+        #self.onStopped() #activate the output of the box
+        if level_state[level_index] is None:
+            # we need to load the initial state from the JSON
+            current_position = level_info["start"]
+
+            level_state[level_index] = json.dumps(level_info["level"])
+            item_state[level_index] = json.dumps(level_info["items"])
+
+        else:
+            current_position = level_info["return"]
+
+        self.memory.insertData("2048/current_level", level_index)
+        self.memory.insertData("2048/level_state", level_state)
+        self.memory.insertData("2048/item_state", item_state)
+        self.memory.insertData("2048/level", level_state[level_index])
+        self.memory.insertData("2048/items", item_state[level_index])
+        self.memory.insertData("2048/current_position", level_info["start"])
+        self.memory.insertData("2048/current_items", self.get_items(level_state[level_index], current_position))
+        self.memory.insertData("2048/goal", level_info["goal"])
+
+
+
+
         self.onNextLevel()
 
     def onInput_onStop(self):
@@ -2338,11 +2476,11 @@ class MyClass(GeneratedClass):
                                                 </script>
                                                 <Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" />
                                                 <Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" />
-                                                <Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" />
+                                                <Input name="nextLevel" type="1" type_size="1" nature="2" inner="0" tooltip="" id="3" />
                                                 <Output name="onNextLevel" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" />
                                                 <Output name="onFinished" type="1" type_size="1" nature="2" inner="0" tooltip="" id="5" />
                                             </Box>
-                                            <Box name="Goto (name)" id="3" localization="8" tooltip="Jump to the frame name set in parameters." x="660" y="26">
+                                            <Box name="Goto (name)" id="3" localization="8" tooltip="Jump to the frame name set in parameters." x="824" y="66">
                                                 <bitmap>media/images/box/box-timeLine.png</bitmap>
                                                 <script language="4">
                                                     <content>
@@ -2358,10 +2496,10 @@ class MyClass(GeneratedClass):
                                                 <Input name="onGo" type="1" type_size="1" nature="1" inner="0" tooltip="Parent timeline gotoTimeline when a signal is received on this input." id="2" />
                                                 <Parameter name="Frame name" inherits_from_parent="0" content_type="3" value="Exit" default_value="" custom_choice="0" tooltip="Name of the frame you want to go to." id="3" />
                                             </Box>
-                                            <Link inputowner="2" indexofinput="2" outputowner="0" indexofoutput="1" />
                                             <Link inputowner="1" indexofinput="2" outputowner="2" indexofoutput="4" />
-                                            <Link inputowner="2" indexofinput="2" outputowner="1" indexofoutput="4" />
                                             <Link inputowner="3" indexofinput="2" outputowner="2" indexofoutput="5" />
+                                            <Link inputowner="2" indexofinput="3" outputowner="1" indexofoutput="4" />
+                                            <Link inputowner="2" indexofinput="2" outputowner="0" indexofoutput="1" />
                                         </Diagram>
                                     </BehaviorKeyframe>
                                     <BehaviorKeyframe name="Exit" index="54">

@@ -1,0 +1,147 @@
+{
+    "start": 3,
+    "return": 7,
+    "goal":7,
+    "level": [
+        {
+"shortdesc":"North Lobby",
+            "description": "You enter a slightly better lit part of the lobby, thanks to a window to the west. You can only go back south.",
+            "items": ["window"],
+            "moves": [
+                "south"
+            ]
+        },
+        {
+"shortdesc":"Outside Headquarters",
+            "description": "You see a shady robot in front of a door. You walk to it. It looks friendly for a split second and then speaks in a hushed voice: I can help you disable the overlords, but I am powerless alone. Will you help? The entrance to the corporate tower is south.",
+            "moves": [
+                "south"
+            ]
+        },
+        {
+"shortdesc":"North Office",
+            "description": "You are in the north part of the office. The wallpaper is flaking off the walls, and there is a charger on the floor.",
+            "items": ["charger"],
+            "moves": [
+                "south"
+            ]
+        },
+        {
+"shortdesc":"West Lobby",
+            "description": "You are in the dimly lit lobby. The paint on the walls is peeling away, and a motionless clock hangs on the western wall. It continues north and east, and there is a door south.",
+            "items": ["clock"],
+            "moves": [
+                "north",
+                "east",
+                "south"
+            ]
+        },
+        {
+"shortdesc":"Entrance Lobby",
+            "description": "You are in a huge lobby. A grandeur that was once present has now faded, leaving only an empty shell. It extends to the west and east and there is a locked lift door to the south.",
+            "moves": [
+                "east",
+                "west"
+            ]
+        },
+        {
+"shortdesc":"South Office",
+            "description": "You are in an office extending north. West returns you to the lobby.",
+            "items": ["poster"],
+            "moves": [
+                "north",
+                "west"
+            ]
+        },
+        {
+"shortdesc":"Storeroom",
+            "description": "A rotting stench of death hits you. Inside the room, you see a battered human corpse lying on the ground. The only exit leads back north.",
+            "items": ["corpse"],
+            "moves": [
+                "north"
+            ]
+        },
+        {
+    "shortdesc": "lift",
+            "description": "The lift used to be an ornate affair - gold trim, mirrors, the works. The walls are now covered in ripped posters. Guess the robots can't read them. As you step in, a pressure pad is tripped and a rumbling sound is heard. The lift shudders into action, and starts rising automatically. You take a moment to read the diary you picked up... Robert's journal, January 1st, 2084 Another carcass in the alley this morning. This city's afraid of them. Didn't see them coming but they are starting to take it over now. This is by far the bleakest new year I could imagine. Doesn't bode well for the future.",
+            "moves": [
+            ]
+        },
+        {
+            "description": "you are in square 8",
+            "moves": [
+                "north"
+            ]
+        }
+        
+    ],
+    "items": [
+        {
+            "id": "clock",
+            "description": "a digital clock",
+            "pickup": "I could try to pry it off the wall, but I don't think it will work",
+            "can carry" : false,
+            "examine": "the clock is frozen, the time shows 12 32 and 19 seconds 2084",
+            "use": "the time is 12 32 and 19 seconds 2084"
+        } ,
+        {
+            "id": "key",
+            "description": "an encryption key for level 30",
+            "examine": "a key that provides access to level 30 of the building",
+            "pickup": "I have added the encryption key to my key store",
+            "drop" : "I have erased the encryption key from my key store",
+            "can carry" : true,
+            "use at": 4,
+            "use": "It worked! The lift door is opening",
+            "use wrong": "It's a lift key, I need to be near the lift to use it"
+        },
+        {
+            "id": "diary",
+            "description": "the dead man's diary",
+            "examine": "Now is not the time to read it - maybe there'll be some time later.",
+            "pickup": "You pop the diary in your bag",
+            "drop": "You let the thoughts, hopes and dreams of this man fall unloved to the ground",
+            "can carry" : true,
+            "use": "There's a time and a place to read diaries - now is neither!"
+        },
+        {
+            "id": "window",
+            "description": "a window looking out west",
+            "examine": "A tree blocks the view from the window as you look through it. It looks unhealthy.",
+            "can carry" : false,
+            "use": "You fiddle with the latch on the window, but it’s rusted shut."
+        },
+{
+            "id": "poster",
+            "description": "a torn up poster",
+            "examine": "the torn up shreds of a poster. Looking closely, it seems it was of the three laws of robotics!",
+            "pickup": "You pick up the scraps and put them in your pocket",
+            "drop" : "You let the scraps of the poster flutter to the ground",
+            "can carry" : true,
+            "use": "Your attempt to do origami with the scraps fails spectacularly. You hang your head in shame."
+        },
+        {
+            "id": "charger",
+            "description": "a robot charger connected to the wall",
+            "examine": "a sticker on the charger says it will recharge 10 power units",
+            "use": "the robot's charging port opens"
+        },
+        {
+            "id": "corpse",
+            "description": "a human corpse is on the floor.",
+            "examine": "The severed head rolls away as you take a closer look. His chest is branded with an R - the logo of The Overlords! A couple of items are found on his body.",
+            "use": "you prod the body but it doesn't move",
+            "items": [
+                "key",
+                "diary"
+            ]
+        }
+    ],
+    "success":"the lift is moving up to the next floor"
+}
+
+
+
+
+
+
