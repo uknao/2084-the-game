@@ -109,7 +109,7 @@
             "description": "a window looking out west",
             "examine": "A tree blocks the view from the window as you look through it. It looks unhealthy.",
             "can carry" : false,
-            "use": "You fiddle with the latch on the window, but it’s rusted shut."
+            "use": "You fiddle with the latch on the window, but it's rusted shut."
         },
 {
             "id": "poster",
