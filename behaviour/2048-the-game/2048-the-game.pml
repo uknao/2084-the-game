@@ -12,6 +12,11 @@
         <File name="choice_sentences" src="behavior_1/Aldebaran/choice_sentences.xml" />
         <File name="level1" src="behavior_1/level1.json" />
         <File name="level0" src="behavior_1/level0.json" />
+        <File name="map" src="html/images/map.jpg" />
+        <File name="south" src="moves/south.pmt" />
+        <File name="north" src="moves/north.pmt" />
+        <File name="west" src="moves/west.pmt" />
+        <File name="east" src="moves/east.pmt" />
     </Resources>
     <Topics>
         <Topic name="ExampleDialog_enu" src="behavior_1/ExampleDialog/ExampleDialog_enu.top" topicName="ExampleDialog" language="en_US" />
